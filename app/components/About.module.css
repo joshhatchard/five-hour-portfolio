@@ -1,0 +1,101 @@
+.section {
+  padding-inline: max(1.5rem, calc((100vw - 90rem) / 2));
+  background: #faf9f3;
+}
+
+.grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  border: 1px solid #dddcd5;
+  /* Continue Creative's three-column guides behind the two-column content. */
+  background-image: linear-gradient(to right, transparent calc(66.666% - 0.5px), #dddcd5 calc(66.666% - 0.5px), #dddcd5 calc(66.666% + 0.5px), transparent calc(66.666% + 0.5px));
+}
+
+.grid::before,
+.grid::after {
+  content: "+";
+  position: absolute;
+  left: calc(33.333% - 5px);
+  color: #b6b5ae;
+  font: 14px monospace;
+}
+
+.grid::before { top: -9px; }
+.grid::after { bottom: -9px; }
+
+.portraitColumn {
+  min-width: 0;
+  padding: clamp(2rem, 6vw, 6rem) clamp(1.5rem, 2.8vw, 2.5rem);
+  border-right: 1px solid #dddcd5;
+}
+
+.label {
+  margin: 0 0 3rem;
+  font: 0.75rem monospace;
+  text-transform: uppercase;
+}
+
+.portrait {
+  position: relative;
+  margin: 0;
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.name {
+  /* Keep the signature above the shared canvas as the portrait bends. */
+  position: relative;
+  z-index: 11;
+  width: fit-content;
+  margin-top: -1.25rem;
+  margin-left: 0.75rem;
+  padding: 0.25rem 0.65rem;
+  background: #d5fa48;
+  color: #171717;
+  font-size: clamp(1.25rem, 2.2vw, 2rem);
+  font-style: italic;
+}
+
+.bio {
+  min-width: 0;
+  padding: clamp(2rem, 6vw, 6rem) clamp(1.5rem, 3vw, 3rem);
+  align-self: center;
+}
+
+.intro,
+.background {
+  margin: 0;
+  font-size: clamp(2rem, 3.9vw, 4rem);
+  line-height: 1.12;
+  letter-spacing: -0.04em;
+}
+
+.background {
+  margin-top: 2rem;
+  color: #77756f;
+}
+
+.background span { color: #282823; }
+
+@media (max-width: 700px) {
+  .section { padding-inline: 1rem; }
+  .grid {
+    grid-template-columns: 1fr;
+    background-image: none;
+  }
+  .grid::before,
+  .grid::after { left: -5px; }
+  .portraitColumn {
+    border-right: 0;
+    border-bottom: 1px solid #dddcd5;
+  }
+  .portrait { max-width: 22rem; }
+  .label { margin-bottom: 2rem; }
+}

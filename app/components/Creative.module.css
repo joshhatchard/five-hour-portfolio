@@ -1,0 +1,38 @@
+.section {
+  position: relative;
+  overflow: clip;
+  padding-inline: max(1.5rem, calc((100vw - 90rem) / 2));
+  border-top: 1px solid #e5e5e5;
+  background: #faf9f3;
+}
+
+.pinnedTitle {
+  position: sticky;
+  top: calc(50svh - 2rem);
+  height: 0;
+  max-width: 22rem;
+}
+
+.pinnedTitle p {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  color: #66645f;
+}
+
+.gallery {
+  padding-block: 45svh 30svh;
+}
+
+@media (max-width: 700px) {
+  .section { padding-inline: 1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pinnedTitle {
+    position: relative;
+    top: auto;
+    height: auto;
+    padding-top: 4rem;
+  }
+  .gallery { padding-block: 4rem; }
+}

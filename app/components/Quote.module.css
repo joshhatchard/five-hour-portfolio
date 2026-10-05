@@ -1,0 +1,127 @@
+.section {
+  --quote-colour: #477dff;
+  position: relative;
+  z-index: 12;
+  background: #faf9f3;
+}
+
+.stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 100svh;
+  overflow: hidden;
+  background: var(--quote-colour);
+}
+
+.colour {
+  position: absolute;
+  top: calc(50% - 71vmax);
+  left: calc(50% - 71vmax);
+  width: 142vmax;
+  height: 142vmax;
+  border-radius: 50%;
+  background: var(--quote-colour);
+  pointer-events: none;
+}
+
+.actor {
+  display: none;
+  position: absolute;
+  width: clamp(6rem, 12vw, 10rem);
+  aspect-ratio: 2 / 3;
+  color: var(--quote-colour);
+  transform-origin: center;
+  pointer-events: none;
+}
+
+.stickman { display: block; width: 100%; height: 100%; }
+
+.hint {
+  display: none;
+  position: absolute;
+  bottom: 3rem;
+  margin: 0;
+  font: 0.7rem monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.words {
+  position: relative;
+  z-index: 1;
+  width: min(100% - 3rem, 68rem);
+  padding-block: 4rem;
+  color: #10131b;
+  text-align: center;
+}
+
+.label {
+  margin: 0 0 2rem;
+  font: 0.75rem monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.quote {
+  margin: 0;
+  font-size: clamp(2.75rem, 8vw, 7.5rem);
+  font-weight: 600;
+  letter-spacing: -0.055em;
+  line-height: 1.02;
+}
+
+.section[data-animated="true"] { height: 617svh; }
+.section[data-animated="true"] .stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  background: #faf9f3;
+  perspective: 900px;
+}
+.section[data-animated="true"] .words,
+.section[data-animated="true"] .cta { grid-area: 1 / 1; }
+.section[data-animated="true"] .cta { margin-top: clamp(8rem, 22svh, 12rem); }
+.section[data-animated="true"] .actor,
+.section[data-animated="true"] .hint { display: block; }
+
+/* Contact navigation lands on the final frame of the combined sequence. */
+.ctaAnchor {
+  position: absolute;
+  top: calc(100% - 100svh);
+  left: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
+.cta {
+  position: relative;
+  z-index: 2;
+  width: min(100% - 3rem, 68rem);
+  padding-block: 3rem;
+  text-align: center;
+  color: #10131b;
+}
+
+.cta h2 {
+  font-size: clamp(2rem, 5vw, 4.5rem);
+  line-height: 1.1;
+  letter-spacing: -0.045em;
+}
+
+.contactLinks {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem 2rem;
+  margin-top: 2rem;
+  font-size: 1rem;
+}
+
+.contactLinks a {
+  text-decoration: underline;
+  text-underline-offset: 0.3em;
+}
+
+.contactLinks a[aria-disabled="true"] { color: #77756f; }

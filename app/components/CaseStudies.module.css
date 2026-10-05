@@ -1,0 +1,122 @@
+.section {
+  padding-block: 4rem;
+  border-top: 1px solid #e5e5e5;
+  background: #faf5ed;
+}
+
+.heading {
+  margin-bottom: 3rem;
+}
+
+.stack {
+  width: min(100% - 3rem, 100rem);
+  margin-inline: auto;
+  /* Keep overflow visible so each card sticks within the whole stack. */
+  isolation: isolate;
+}
+
+.card {
+  position: sticky;
+  top: 1.5rem;
+  min-height: calc(100svh - 3rem);
+  padding: clamp(1.5rem, 4vw, 4rem);
+  border-radius: clamp(1.5rem, 3vw, 3rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 3rem;
+  color: #171717;
+}
+
+/* Later cards naturally paint over earlier cards as they reach the top. */
+.card + .card {
+  margin-top: 2rem;
+}
+
+.cardHeader {
+  position: relative;
+  padding-right: clamp(4rem, 12vw, 12rem);
+}
+
+.label {
+  display: inline-block;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  background: white;
+  font-size: 0.875rem;
+}
+
+.number {
+  position: absolute;
+  top: 0;
+  right: 0;
+  color: rgb(255 255 255 / 45%);
+  font-size: clamp(3rem, 9vw, 9rem);
+  line-height: 1;
+  letter-spacing: -0.06em;
+}
+
+.title {
+  margin: 1.5rem 0 0;
+  font-size: clamp(2.5rem, 7vw, 7rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  overflow-wrap: anywhere;
+}
+
+.cardBody {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.description {
+  max-width: 25rem;
+  margin: 0;
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
+  line-height: 1.5;
+}
+
+.media {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: min(30%, 20rem);
+  aspect-ratio: 4 / 3;
+  border: 0.5rem solid white;
+  border-radius: 1.5rem;
+  background: rgb(255 255 255 / 25%);
+  font-size: 0.875rem;
+}
+
+@media (max-width: 600px) {
+  .stack {
+    width: calc(100% - 2rem);
+  }
+
+  .card {
+    top: 1rem;
+    min-height: calc(100svh - 2rem);
+    gap: 2rem;
+  }
+
+  .cardBody {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .media {
+    width: 100%;
+    max-height: 30svh;
+  }
+}
+
+/* Keep every card readable on short screens and for reduced motion. */
+@media (max-height: 600px), (prefers-reduced-motion: reduce) {
+  .card {
+    position: relative;
+    top: auto;
+  }
+}

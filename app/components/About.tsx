@@ -1,0 +1,34 @@
+import WarpImage from "./warp-grid/WarpImage";
+import styles from "./About.module.css";
+
+export default function About() {
+  return (
+    <section id="about" className={styles.section} aria-labelledby="about-heading">
+      <div className={styles.grid}>
+        <div className={styles.portraitColumn}>
+          <h2 id="about-heading" className={styles.label}>About</h2>
+          <figure className={styles.portrait}>
+            <WarpImage
+              src="/about/portrait-placeholder.svg"
+              alt="Portrait placeholder — add your photo here"
+              width={800}
+              height={800}
+              className={styles.image}
+            />
+            <figcaption className={styles.name}>Your name</figcaption>
+          </figure>
+        </div>
+        <div className={styles.bio}>
+          {/* Replace these two paragraphs with your introduction and background. */}
+          <p className={styles.intro}>
+            A little about me, what I do, and what I care about.
+          </p>
+          <p className={styles.background}>
+            A few words about my <span>background</span>, my current focus,
+            and the <span>people I’ve worked with</span>.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
