@@ -1,3 +1,4 @@
+import Splash from "./hero-dive/Splash";
 import styles from "./CaseStudies.module.css";
 
 // Replace these placeholders with your projects as they are ready.
@@ -11,6 +12,7 @@ const caseStudies = [
 export default function CaseStudies() {
   return (
     <section id="case-studies" className={styles.section} aria-labelledby="case-studies-heading">
+      <Splash />
       <div className={`container ${styles.heading}`}>
         <h2 id="case-studies-heading">Case Studies</h2>
       </div>

@@ -1,4 +1,12 @@
 .hero {
+  --hero-lime: #d5fa48;
+  position: relative;
+  background: #faf9f3;
+  color: #11120e;
+}
+
+.stage {
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -20,19 +28,26 @@
 }
 
 .illustration { min-width: 0; }
-.scene { display: block; width: 100%; height: auto; }
+.scene { display: block; width: 100%; height: auto; overflow: visible; }
 .copy { min-width: 0; padding-block: 2rem; }
 
 .title {
-  font-size: clamp(2.5rem, 4.7vw, 5.25rem);
-  font-weight: 400;
+  position: relative;
+  width: max-content;
+  transform-origin: left top;
+  z-index: 1;
+  font-family: var(--font-headline), Arial, sans-serif;
+  font-size: clamp(1.15rem, 2.8vw, 2.85rem);
+  font-weight: 350;
   line-height: 1.14;
   letter-spacing: -0.055em;
   text-transform: uppercase;
 }
 
-.title > span { display: block; }
+.title > span { display: block; white-space: nowrap; }
 .title strong { font-weight: 900; }
+.title .designWord { font-weight: 650; font-style: italic; }
+.title .codeWord { font-family: var(--font-code), monospace; font-weight: 600; letter-spacing: -0.08em; }
 
 .designBadge,
 .codeBadge {
@@ -41,21 +56,21 @@
   align-items: center;
   width: 1.85em;
   height: 0.95em;
-  border: 3px solid #11120e;
+  border: 2px solid #11120e;
   border-radius: 999px;
   vertical-align: 0.12em;
-  font-size: 0.6em;
+  font-size: 0.5em;
   letter-spacing: -0.08em;
 }
 
-.designBadge { background: #d5fa48; }
+.designBadge { background: #faf9f3; transform: rotate(-12deg); }
 .codeBadge { background: #11120e; color: #faf9f3; }
 
 .highlight {
   display: inline-block;
   margin-block: 0.25em 0.15em;
   padding: 0.04em 0.16em;
-  background: #d5fa48;
+  background: var(--hero-lime);
   transform: rotate(-3deg);
 }
 
@@ -92,12 +107,32 @@
 .actions a:focus-visible,
 .scrollCue:focus-visible { outline: 2px solid #477dff; outline-offset: 5px; }
 
-@media (max-width: 700px) {
-  .hero { padding-top: 1rem; }
+@media (max-width: 767px) {
+  .stage { padding-top: 1rem; }
   .layout { grid-template-columns: 1fr; gap: 0; }
   .illustration { width: min(100%, 22rem); justify-self: start; }
   .scene { max-height: 16rem; }
   .copy { padding-block: 1rem; }
-  .title { font-size: clamp(2.5rem, 10vw, 4rem); }
+  .title { font-size: clamp(1rem, 5.3vw, 2.75rem); }
   .scrollCue { margin-top: 2rem; }
+}
+
+.hero[data-dive="true"] { height: var(--hero-scroll-height); }
+.hero[data-dive="true"] .stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  min-height: 0;
+}
+.fill { position: absolute; pointer-events: none; background: var(--hero-lime); opacity: 0; }
+.layout, .scrollCue { position: relative; }
+.highlight { position: relative; transform-origin: left top; z-index: 1; }
+.hero[data-model-ready="true"] .fallbackFigure { visibility: hidden; }
+@media (max-width: 767px) {
+  .hero[data-dive="true"] .stage { padding-block: 1rem; }
+  .hero[data-dive="true"] .layout { flex: 1; align-content: center; }
+  .hero[data-dive="true"] .copy { padding-block: 0.5rem; }
+  .hero[data-dive="true"] .scene { max-height: 26svh; }
+  .hero[data-dive="true"] .description { margin-top: 1rem; }
+  .hero[data-dive="true"] .scrollCue { margin-top: 0.5rem; }
 }

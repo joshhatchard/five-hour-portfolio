@@ -52,8 +52,8 @@ real accessible image and caption. Use a unique `src` for each entry.
 
 The gallery is flat at rest. The pinned title remains behind the moving work.
 Mobile and touch devices use the same WebGL warp with a lighter `mobileStrength`;
-touch scrolling stays native. Reduced-motion users get plain images without WebGL
-or smooth scrolling. The current media type is images;
+touch scrolling stays native. Reduced-motion users get plain gallery images without warping
+or smooth scrolling; the hero still renders its 3D model at rest. The current media type is images;
 video playback/texture support is not implemented.
 
 Run `npm run lint`, `npx tsc --noEmit`, and `npm run build -- --webpack` to check the
@@ -62,3 +62,35 @@ Chromium browser checks (the runner reuses an existing server on port 3000 or
 starts one). Tests cover desktop rendering, texture handoff, scrolling, preference
 changes, and the mobile/reduced-motion fallbacks. Actual frame rate depends on the
 device; no 60fps guarantee is assumed.
+
+## Hero dive
+
+`app/components/hero-dive/` uses the supplied world-space bone poser and
+Catmull–Rom keyframes to animate `public/models/stickman.glb`. Tune the scroll
+length and desktop/mobile zoom in `controller.ts`, and joint poses in
+`divePose.ts`. `useHeroDive.ts` measures the existing illustration and FULL SEND
+badge, drives the parallax/lime expansion, and anchors the reversible splash to
+the real white Case Studies top edge. The following Creative section retains its
+existing cream background.
+
+`HeroDiver.tsx` renders through the existing shared canvas and GSAP/Lenis clock;
+there is no extra animation loop. Camera follow uses eased scroll progress so
+reverse scrolling returns to exactly the same framing. The hero model is skipped
+outside its visible section. Reduced motion keeps the 3D hero at rest with ordinary document flow. Only
+unavailable WebGL or a failed model download restores the SVG fallback. The model
+faces left toward the page centre, holds the first tuck for an extra quarter-turn,
+then stays extended through the remaining rotation (720° total). There is no
+run-up or axial twist. It extends both
+legs for a feet-first entry while folding the forearms toward the chest. Tune
+choreography in `divePose.ts`; `poser.ts` keeps the world-space bone convention
+and supports the elbow fold. The figure uses a flat, unlit ink material. The scroll sequence spans 4.4 viewport
+heights, and the lime FULL SEND expansion fills the screen before take-off (20%).
+
+`tests/hero-dive.spec.ts` captures the flip stages (10–85%), checks stationary take-off and feet-first entry,
+and compares every stage on reverse scrolling at
+1440×900 and 390×844 in `/tmp/hero-dive`, and checks landing alignment, console
+errors, overflow and reduced motion. Run with `npx playwright test tests/hero-dive.spec.ts`.
+
+Model: [Free Pack - Stick Man (Rigged)](https://sketchfab.com/3d-models/free-pack-stick-man-rigged-29e53f85cf1641c7a602af7fc02356b2)
+by PolyOne Studio, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+Posed and recoloured for this site; attribution is also displayed in the footer.

@@ -1,7 +1,9 @@
 .section {
+  position: relative;
+  z-index: 11;
   padding-block: 4rem;
   border-top: 1px solid #e5e5e5;
-  background: #faf5ed;
+  background: #ffffff;
 }
 
 .heading {

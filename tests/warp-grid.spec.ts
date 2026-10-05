@@ -39,9 +39,9 @@ test("desktop replaces visible media with one canvas and restores flat artwork",
   await page.screenshot({ path: "/tmp/warp-grid-settled.png" });
   await expect(page.locator("canvas")).toHaveCount(1);
   expect(errors).toEqual([]);
-  // Changing the preference tears down WebGL and restores actual DOM images.
+  // Reduced motion restores DOM gallery images, while the static hero retains its canvas.
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await expect(page.locator("canvas")).toHaveCount(0);
+  await expect(page.locator("canvas")).toHaveCount(1);
   await expect(images.first()).toHaveCSS("opacity", "1");
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await expect(page.locator("canvas")).toHaveCount(1);
@@ -79,10 +79,10 @@ test("mobile renders the warp during native touch scrolling", async ({ browser }
   await context.close();
 });
 
-test("reduced motion starts without a canvas or hidden media", async ({ page }) => {
+test("reduced motion keeps the static hero canvas and visible gallery media", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto(baseURL);
-  await expect(page.locator("canvas")).toHaveCount(0);
+  await expect(page.locator("canvas")).toHaveCount(1);
   await expect(page.locator("#creative img").first()).toHaveCSS("opacity", "1");
 });
 
@@ -104,7 +104,7 @@ test("About shares Creative's canvas and falls back cleanly", async ({ page }) =
   await page.screenshot({ path: "/tmp/about-desktop.png" });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(portrait).toHaveCSS("opacity", "1");
-  await expect(page.locator("canvas")).toHaveCount(0);
+  await expect(page.locator("canvas")).toHaveCount(1);
   await page.setViewportSize({ width: 390, height: 844 });
   await portrait.scrollIntoViewIfNeeded();
   const photo = await portrait.boundingBox();

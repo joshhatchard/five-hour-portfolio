@@ -7,6 +7,7 @@ import Lenis from "lenis";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import type { HeroController } from "../hero-dive/controller";
 import { warpConfig } from "./config";
 
 const WarpCanvas = dynamic(() => import("./WarpCanvas"), { ssr: false });
@@ -26,11 +27,14 @@ export type ScrollRuntime = {
   update: Set<() => void>;
   refresh: Set<() => void>;
   render: Set<() => void>;
+  backgroundRender: Set<() => void>;
+  heroes: Set<HeroController>;
 };
 
 type ScrollContextValue = {
   runtime: RefObject<ScrollRuntime>;
   entries: WarpEntry[];
+  motionEnabled: boolean;
   register: (entry: WarpEntry) => () => void;
 };
 const ScrollContext = createContext<ScrollContextValue | null>(null);
@@ -45,32 +49,32 @@ export default function ScrollProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const enabled = useSyncExternalStore(subscribeMotion, () => window.matchMedia(motionQuery).matches, () => false);
   const [entries, setEntries] = useState<WarpEntry[]>([]);
-  const runtime = useRef<ScrollRuntime>({ scroll: 0, velocity: 0, delta: 0, lenis: null, update: new Set(), refresh: new Set(), render: new Set() });
+  const runtime = useRef<ScrollRuntime>({ scroll: 0, velocity: 0, delta: 0, lenis: null, update: new Set(), refresh: new Set(), render: new Set(), backgroundRender: new Set(), heroes: new Set() });
   const register = useCallback((entry: WarpEntry) => {
     setEntries((current) => [...current.filter((item) => item.id !== entry.id), entry]);
     return () => setEntries((current) => current.filter((item) => item !== entry));
   }, []);
 
   useGSAP(() => {
-    if (!enabled) return;
     gsap.registerPlugin(ScrollTrigger, useGSAP);
-    const lenis = new Lenis({ autoRaf: false, anchors: true, duration: 0.65, syncTouch: false });
+    const lenis = enabled ? new Lenis({ autoRaf: false, anchors: true, duration: 0.65, syncTouch: false }) : null;
     runtime.current.lenis = lenis;
     runtime.current.scroll = window.scrollY;
     runtime.current.velocity = 0;
-    let previous = lenis.scroll;
+    let previous = lenis?.scroll ?? window.scrollY;
     let active = true;
     const refresh = () => {
       if (!active) return;
-      lenis.resize();
+      lenis?.resize();
       runtime.current.refresh.forEach((callback) => callback());
       ScrollTrigger.refresh();
     };
     const tick = (time: number, deltaMs: number) => {
-      lenis.raf(time * 1000);
+      lenis?.raf(time * 1000);
       const delta = Math.min(64, Math.max(1, deltaMs));
-      const raw = (lenis.scroll - previous) * (1000 / 60) / delta;
-      previous = lenis.scroll;
+      const scroll = lenis?.scroll ?? window.scrollY;
+      const raw = enabled ? (scroll - previous) * (1000 / 60) / delta : 0;
+      previous = scroll;
       const target = gsap.utils.clamp(-warpConfig.maxVelocity, warpConfig.maxVelocity, raw);
       const blend = 1 - Math.pow(1 - warpConfig.lerp, delta / (1000 / 60));
       runtime.current.velocity = gsap.utils.interpolate(runtime.current.velocity, target, blend);
@@ -80,7 +84,7 @@ export default function ScrollProvider({ children }: { children: ReactNode }) {
       runtime.current.update.forEach((callback) => callback());
       runtime.current.render.forEach((callback) => callback());
     };
-    lenis.on("scroll", ScrollTrigger.update);
+    lenis?.on("scroll", ScrollTrigger.update);
     gsap.ticker.lagSmoothing(0);
     gsap.ticker.add(tick);
     window.addEventListener("resize", refresh);
@@ -93,18 +97,18 @@ export default function ScrollProvider({ children }: { children: ReactNode }) {
       observer.disconnect();
       window.removeEventListener("resize", refresh);
       gsap.ticker.remove(tick);
-      lenis.off("scroll", ScrollTrigger.update);
-      lenis.destroy();
+      lenis?.off("scroll", ScrollTrigger.update);
+      lenis?.destroy();
       runtime.current.lenis = null;
       runtime.current.velocity = 0;
     };
   }, { dependencies: [enabled, pathname, runtime], revertOnUpdate: true });
 
-  const value = useMemo(() => ({ runtime, entries, register }), [runtime, entries, register]);
+  const value = useMemo(() => ({ runtime, entries, register, motionEnabled: enabled }), [runtime, entries, register, enabled]);
   return (
     <ScrollContext.Provider value={value}>
       {children}
-      {enabled && <WarpCanvas />}
+      <WarpCanvas />
     </ScrollContext.Provider>
   );
 }
