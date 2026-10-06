@@ -1,13 +1,17 @@
 .section {
+  position: relative;
+  padding-top: 100svh;
   padding-inline: max(1.5rem, calc((100vw - 90rem) / 2));
   background: #faf9f3;
 }
 
 .grid {
   position: relative;
+  z-index: 2;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
   border: 1px solid #dddcd5;
+  background-color: #faf9f3;
   /* Continue Creative's three-column guides behind the two-column content. */
   background-image: linear-gradient(to right, transparent calc(66.666% - 0.5px), #dddcd5 calc(66.666% - 0.5px), #dddcd5 calc(66.666% + 0.5px), transparent calc(66.666% + 0.5px));
 }

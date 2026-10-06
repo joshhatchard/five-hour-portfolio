@@ -50,6 +50,7 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
           if (animated) hero.dataset.dive = "true";
 
           const scrollState = runtime.current;
+          const scrollProgress = { value: 0 };
           const controller: HeroController = {
             element: hero,
             progress: 0,
@@ -81,7 +82,7 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
             if (animated) {
               hero.style.setProperty(
                 "--hero-scroll-height",
-                `${controller.height * diveConfig.stageHeights}px`,
+                `${controller.height * (diveConfig.stageHeights + diveConfig.splashHoldHeights)}px`,
               );
             }
             const rect = svg.getBoundingClientRect();
@@ -178,8 +179,8 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
               controller.height * 0.07 - Math.min(0, controller.stageTop);
             highlight.style.transform = `translate(${(targetX - badge.left) * expand}px, ${(targetY - badge.top) * expand}px) scale(${mix(1, textScale, expand)}) rotate(${-3 * (1 - expand)}deg)`;
 
-            const t = clamp((p - 0.835) / 0.165);
-            splash.style.opacity = p > 0.835 && p < 1 ? "1" : "0";
+            const t = clamp((p - diveConfig.impact) / (1 - diveConfig.impact));
+            splash.style.opacity = p > diveConfig.impact && p < 1 ? "1" : "0";
 
             drops.forEach((drop, index) => {
               const seed = ((index * 73 + 19) % 101) / 100;
@@ -212,6 +213,20 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
           };
 
           const update = () => {
+            if (animated) {
+              const { stageHeights, splashHoldHeights, impact } = diveConfig;
+              const distance = scrollProgress.value * (stageHeights + splashHoldHeights);
+              const impactDistance = stageHeights * impact;
+              const hold = clamp((distance - impactDistance) / splashHoldHeights);
+              controller.progress = distance < impactDistance
+                ? distance / stageHeights
+                : mix(impact, 1, hold);
+              // Keep the actual section edge at the landing height throughout
+              // the splash, then let normal scrolling bring the heading up.
+              water.style.transform = hold < 1
+                ? `translateY(${-controller.height * splashHoldHeights * (1 - hold)}px)`
+                : "";
+            }
             const rect = hero.getBoundingClientRect();
             controller.stageTop = stage.getBoundingClientRect().top;
             controller.waterline = water.getBoundingClientRect().top;
@@ -227,15 +242,16 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
           scrollState.refresh.add(measure);
 
           const tween = animated
-            ? gsap.to(controller, {
-                progress: 1,
+            ? gsap.to(scrollProgress, {
+                value: 1,
+                onUpdate: update,
                 ease: "none",
                 scrollTrigger: {
                   id: "hero-dive",
                   trigger: hero,
                   start: "top top",
                   end: () =>
-                    `+=${controller.height * (diveConfig.stageHeights - diveConfig.endWaterline)}`,
+                    `+=${controller.height * (diveConfig.stageHeights + diveConfig.splashHoldHeights)}`,
                   scrub: true,
                   invalidateOnRefresh: true,
                   onRefresh: measure,
@@ -243,9 +259,15 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
               })
             : null;
 
+          const pin = animated ? ScrollTrigger.create({
+            trigger: hero, start: "top top",
+            end: () => `+=${controller.height * (diveConfig.stageHeights + diveConfig.splashHoldHeights)}`,
+            pin: stage, pinSpacing: false,
+          }) : null;
+
           const refresh = () => {
             measure();
-            tween?.scrollTrigger?.refresh();
+            ScrollTrigger.refresh();
           };
           window.addEventListener("resize", refresh);
 
@@ -258,6 +280,9 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
 
           return () => {
             alive = false;
+            pin?.kill();
+            tween?.kill();
+            water.style.removeProperty("transform");
             window.removeEventListener("resize", refresh);
             scrollState.heroes.delete(controller);
             scrollState.update.delete(update);

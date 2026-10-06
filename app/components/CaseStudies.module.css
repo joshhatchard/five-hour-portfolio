@@ -1,124 +1,112 @@
 .section {
   position: relative;
-  z-index: 11;
-  padding-block: 4rem;
-  border-top: 1px solid #e5e5e5;
-  background: #ffffff;
+  background: #000;
+  color: #fff;
 }
 
-.heading {
-  margin-bottom: 3rem;
-}
-
-.stack {
-  width: min(100% - 3rem, 100rem);
-  margin-inline: auto;
-  /* Keep overflow visible so each card sticks within the whole stack. */
-  isolation: isolate;
-}
-
-.card {
-  position: sticky;
-  top: 1.5rem;
-  min-height: calc(100svh - 3rem);
-  padding: clamp(1.5rem, 4vw, 4rem);
-  border-radius: clamp(1.5rem, 3vw, 3rem);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 3rem;
-  color: #171717;
-}
-
-/* Later cards naturally paint over earlier cards as they reach the top. */
-.card + .card {
-  margin-top: 2rem;
-}
-
-.cardHeader {
+.gallery {
+  --guide: rgb(255 255 255 / 12%);
   position: relative;
-  padding-right: clamp(4rem, 12vw, 12rem);
-}
-
-.label {
-  display: inline-block;
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.5rem;
-  background: white;
-  font-size: 0.875rem;
-}
-
-.number {
-  position: absolute;
-  top: 0;
-  right: 0;
-  color: rgb(255 255 255 / 45%);
-  font-size: clamp(3rem, 9vw, 9rem);
-  line-height: 1;
-  letter-spacing: -0.06em;
-}
-
-.title {
-  margin: 1.5rem 0 0;
-  font-size: clamp(2.5rem, 7vw, 7rem);
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: -0.05em;
-  overflow-wrap: anywhere;
-}
-
-.cardBody {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 2rem;
-}
-
-.description {
-  max-width: 25rem;
-  margin: 0;
-  font-size: clamp(1rem, 1.5vw, 1.25rem);
-  line-height: 1.5;
-}
-
-.media {
+  z-index: 2;
   display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  width: min(30%, 20rem);
-  aspect-ratio: 4 / 3;
-  border: 0.5rem solid white;
-  border-radius: 1.5rem;
-  background: rgb(255 255 255 / 25%);
-  font-size: 0.875rem;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-items: start;
+  column-gap: clamp(1rem, 2vw, 2.5rem);
+  row-gap: clamp(5rem, 12vw, 14rem);
+  width: min(92%, 110rem);
+  margin-inline: auto;
+  padding-block: calc(100svh + clamp(2rem, 6vw, 7rem)) clamp(7rem, 16vw, 18rem);
 }
 
-@media (max-width: 600px) {
-  .stack {
+.guides {
+  position: absolute;
+  inset: 100svh 0 0;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+}
+.guides i { width: 1px; background: var(--guide); }
+
+.project {
+  position: relative;
+  min-width: 0;
+  grid-column: 5 / -1;
+}
+.project:nth-of-type(3n + 2) { grid-column: 1 / 7; }
+.project:nth-of-type(3n) {
+  grid-column: 8 / -1;
+  margin-top: clamp(6rem, 15vw, 18rem);
+}
+.project::before {
+  content: "+";
+  position: absolute;
+  left: -0.35rem;
+  top: -2.55rem;
+  color: #64645e;
+  font: 1rem monospace;
+}
+.project::after {
+  content: "";
+  position: absolute;
+  top: -2rem;
+  left: 0.75rem;
+  right: 0;
+  height: 1px;
+  background: var(--guide);
+}
+
+.figure { margin: 0; }
+.artwork { position: relative; overflow: hidden; background: #171717; }
+.image {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 8 / 5;
+  object-fit: cover;
+  transition: transform 700ms cubic-bezier(0.2, 0.65, 0.3, 1);
+}
+.tag {
+  position: absolute;
+  right: 0;
+  top: 0;
+  padding: 0.15rem 0.4rem;
+  background: #d5fa48;
+  color: #11120e;
+  font: 0.7rem / 1.15 monospace;
+  text-transform: uppercase;
+}
+.caption {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  margin-top: 0.9rem;
+  font: clamp(0.7rem, 0.95vw, 0.9rem) / 1.4 monospace;
+  text-transform: uppercase;
+}
+.caption h3 { margin: 0; font: inherit; }
+.number { color: #a3a39b; white-space: nowrap; }
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .artwork:hover .image { transform: scale(1.025); }
+}
+
+@media (max-width: 700px) {
+  .gallery {
     width: calc(100% - 2rem);
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 0;
+    row-gap: 5rem;
+    padding-block: calc(100svh + 3rem) 7rem;
   }
-
-  .card {
-    top: 1rem;
-    min-height: calc(100svh - 2rem);
-    gap: 2rem;
-  }
-
-  .cardBody {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .media {
-    width: 100%;
-    max-height: 30svh;
-  }
+  .project { grid-column: 1 / -1; }
+  .project:nth-of-type(3n + 2) { grid-column: 1 / 12; }
+  .project:nth-of-type(3n) { grid-column: 2 / -1; margin-top: 0; }
+  .guides i:nth-child(2), .guides i:nth-child(3) { display: none; }
+  .caption { margin-top: 0.75rem; }
+  .tag { font-size: 0.625rem; }
 }
 
-/* Keep every card readable on short screens and for reduced motion. */
-@media (max-height: 600px), (prefers-reduced-motion: reduce) {
-  .card {
-    position: relative;
-    top: auto;
-  }
+@media (prefers-reduced-motion: reduce) {
+  .image { transition: none; }
 }

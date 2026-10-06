@@ -1,40 +1,33 @@
 import Splash from "./hero-dive/Splash";
 import styles from "./CaseStudies.module.css";
 
-// Replace these placeholders with your projects as they are ready.
+// Replace the artwork and titles with finished case studies when ready.
 const caseStudies = [
-  { number: "01", title: "Project one", colour: "#bac9ff" },
-  { number: "02", title: "Project two", colour: "#f5b5f5" },
-  { number: "03", title: "Project three", colour: "#31c496" },
-  { number: "04", title: "Project four", colour: "#ff997f" },
+  { number: "01", title: "Project one", src: "/case-studies/project-one.svg", alt: "Placeholder artwork: an oversized black asterisk on a warm grey background" },
+  { number: "02", title: "Project two", src: "/case-studies/project-two.svg", alt: "Placeholder artwork: orange and lilac geometric forms on black" },
+  { number: "03", title: "Project three", src: "/case-studies/project-three.svg", alt: "Placeholder artwork: overlapping blue and green interface panels" },
 ];
 
 export default function CaseStudies() {
   return (
-    <section id="case-studies" className={styles.section} aria-labelledby="case-studies-heading">
+    <section id="case-studies" className={styles.section} aria-label="Case studies">
       <Splash />
-      <div className={`container ${styles.heading}`}>
-        <h2 id="case-studies-heading">Case Studies</h2>
-      </div>
-      <div className={styles.stack}>
+      <div className={styles.gallery} data-case-gallery>
+        <div className={styles.guides} aria-hidden="true"><i /><i /><i /><i /></div>
         {caseStudies.map((project) => (
-          <article
-            key={project.number}
-            className={styles.card}
-            style={{ backgroundColor: project.colour }}
-            aria-labelledby={`project-${project.number}`}
-          >
-            <div className={styles.cardHeader}>
-              <span className={styles.label}>Case study</span>
-              <span className={styles.number} aria-hidden="true">{project.number}</span>
-              <h3 id={`project-${project.number}`} className={styles.title}>{project.title}</h3>
-            </div>
-            <div className={styles.cardBody}>
-              <p className={styles.description}>
-                A short description of the project, your role, and the outcome.
-              </p>
-              <div className={styles.media}>Project image</div>
-            </div>
+          <article key={project.number} className={styles.project} aria-labelledby={`project-${project.number}`}>
+            <figure className={styles.figure}>
+              <div className={styles.artwork}>
+                {/* The image remains in normal document flow, above the opaque hero cover. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={project.src} alt={project.alt} width={1600} height={1000} className={styles.image} loading="lazy" />
+                <span className={styles.tag}>Case study</span>
+              </div>
+              <figcaption className={styles.caption}>
+                <h3 id={`project-${project.number}`}>{project.title}</h3>
+                <span className={styles.number}>{project.number} / 03</span>
+              </figcaption>
+            </figure>
           </article>
         ))}
       </div>

@@ -119,8 +119,7 @@
 
 .hero[data-dive="true"] { height: var(--hero-scroll-height); }
 .hero[data-dive="true"] .stage {
-  position: sticky;
-  top: 0;
+  position: relative;
   height: 100svh;
   min-height: 0;
 }

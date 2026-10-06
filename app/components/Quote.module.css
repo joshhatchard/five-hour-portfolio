@@ -28,14 +28,17 @@
 .actor {
   display: none;
   position: absolute;
-  width: clamp(6rem, 12vw, 10rem);
-  aspect-ratio: 2 / 3;
-  color: var(--quote-colour);
+  width: clamp(12rem, 25vw, 20rem);
+  aspect-ratio: 1;
+  color: #11120e;
   transform-origin: center;
   pointer-events: none;
 }
 
 .stickman { display: block; width: 100%; height: 100%; }
+.actor canvas { display: none; width: 100%; height: 100%; }
+.actor[data-model-ready="true"] canvas { display: block; }
+.actor[data-model-ready="true"] .stickman { display: none; }
 
 .hint {
   display: none;

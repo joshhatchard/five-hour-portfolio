@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+  <rect width="1600" height="1000" fill="#b8cafa"/>
+  <g transform="translate(315 200) rotate(-9 260 300)">
+    <rect width="520" height="600" rx="28" fill="#faf9f3"/>
+    <circle cx="55" cy="55" r="12" fill="#11120e"/>
+    <path d="M100 55h195M45 485h260M45 525h180" stroke="#11120e" stroke-width="12"/>
+    <circle cx="260" cy="275" r="115" fill="#bac9ff"/><path d="M215 215l100 60-100 60z" fill="#11120e"/>
+  </g>
+  <g transform="translate(795 205) rotate(10 235 295)">
+    <rect width="470" height="590" rx="28" fill="#11120e"/>
+    <rect x="30" y="30" width="410" height="360" rx="14" fill="#d5fa48"/>
+    <path d="M140 285l95-155 95 155z" fill="none" stroke="#11120e" stroke-width="22" stroke-linejoin="round"/>
+    <path d="M40 445h240M40 485h170" stroke="#faf9f3" stroke-width="12"/><circle cx="393" cy="505" r="30" fill="#d5fa48"/>
+  </g>
+  <text x="60" y="920" fill="#343d58" font-family="monospace" font-size="18">INTERFACE EXPLORATION / 03</text>
+</svg>

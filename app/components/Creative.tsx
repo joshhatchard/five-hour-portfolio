@@ -13,11 +13,7 @@ const creativeWork: CreativeWork[] = [
 
 export default function Creative() {
   return (
-    <section id="creative" className={styles.section} aria-labelledby="creative-heading">
-      <div className={styles.pinnedTitle}>
-        <h2 id="creative-heading">Creative</h2>
-        <p>Small projects &amp; experiments.</p>
-      </div>
+    <section id="creative" className={styles.section} aria-label="Creative work">
       <div className={styles.gallery}>
         <WarpGrid items={creativeWork} />
       </div>

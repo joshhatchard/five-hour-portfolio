@@ -1,0 +1,28 @@
+.work { position: relative; }
+.heading {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  margin-bottom: -100svh;
+  display: flex;
+  align-items: center;
+  z-index: 1;
+  pointer-events: none;
+  color: white;
+  mix-blend-mode: difference;
+}
+.copy { width: min(92%, 110rem); margin-inline: auto; }
+.copy h2 {
+  font-family: inherit;
+  font-size: clamp(2.25rem, 6vw, 6rem);
+  font-weight: 350;
+  line-height: 1.14;
+  letter-spacing: -0.055em;
+  white-space: nowrap;
+}
+.copy [data-glyph] { display: inline-block; transform-origin: center bottom; }
+.copy [data-glyph][hidden] { display: none; }
+.copy [data-word-start] { margin-left: 0.3em; }
+.copy [data-emphasis] { font-weight: 900; }
+.copy p { margin-top: 0.75rem; font-size: 0.875rem; opacity: 0.65; }
+@media (max-width: 700px) { .copy { width: calc(100% - 2rem); } }

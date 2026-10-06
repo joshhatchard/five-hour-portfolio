@@ -57,8 +57,37 @@ export default function ScrollProvider({ children }: { children: ReactNode }) {
 
   useGSAP(() => {
     gsap.registerPlugin(ScrollTrigger, useGSAP);
-    const lenis = enabled ? new Lenis({ autoRaf: false, anchors: true, duration: 0.65, syncTouch: false }) : null;
+    const lenis = enabled ? new Lenis({
+      // Share GSAP's clock so the page, WebGL, and scroll animations stay aligned.
+      autoRaf: false,
+      smoothWheel: true,
+      lerp: 0.075,
+      wheelMultiplier: 0.95,
+      syncTouch: false,
+      stopInertiaOnNavigate: true,
+      anchors: {
+        lerp: 0,
+        duration: 1.25,
+        easing: (t: number) => 1 - Math.pow(1 - t, 4),
+      },
+    }) : null;
     runtime.current.lenis = lenis;
+    const navigateToWork = (event: MouseEvent) => {
+      if (!lenis || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const link = (event.target as Element).closest?.('a[href="#case-studies"]');
+      const section = document.getElementById("case-studies");
+      if (!link || !section) return;
+      // The splash temporarily translates this section; anchors target its resting position.
+      const offset = new DOMMatrixReadOnly(getComputedStyle(section).transform).m42;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      lenis.scrollTo(section.getBoundingClientRect().top + window.scrollY - offset, {
+        lerp: 0,
+        duration: 1.25,
+        easing: (t: number) => 1 - Math.pow(1 - t, 4),
+      });
+    };
+    document.addEventListener("click", navigateToWork, true);
     runtime.current.scroll = window.scrollY;
     runtime.current.velocity = 0;
     let previous = lenis?.scroll ?? window.scrollY;
@@ -94,6 +123,7 @@ export default function ScrollProvider({ children }: { children: ReactNode }) {
     refresh();
     return () => {
       active = false;
+      document.removeEventListener("click", navigateToWork, true);
       observer.disconnect();
       window.removeEventListener("resize", refresh);
       gsap.ticker.remove(tick);

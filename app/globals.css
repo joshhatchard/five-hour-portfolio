@@ -21,6 +21,15 @@ body {
   padding-block: 1.5rem;
 }
 
+.navbar {
+  position: fixed;
+  top: 0;
+  inset-inline: 0;
+  z-index: 50;
+  background: transparent;
+  color: #000000;
+}
+
 .navbar nav,
 .nav-links {
   display: flex;
@@ -65,3 +74,5 @@ h2 {
 .footer {
   border-top: 1px solid #e5e5e5;
 }
+
+.lenis-stopped { overflow: hidden; }

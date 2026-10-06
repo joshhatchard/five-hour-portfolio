@@ -1,5 +1,6 @@
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
+import WorkShowcase from "./components/WorkShowcase";
 import CaseStudies from "./components/CaseStudies";
 import Creative from "./components/Creative";
 import About from "./components/About";
@@ -12,9 +13,11 @@ export default function Home() {
       <Navbar />
       <main>
         <Hero />
-        <CaseStudies />
-        <Creative />
-        <About />
+        <WorkShowcase>
+          <CaseStudies />
+          <Creative />
+          <About />
+        </WorkShowcase>
         <Quote />
       </main>
       <Footer />

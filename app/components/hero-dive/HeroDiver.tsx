@@ -301,6 +301,15 @@ export default function HeroDiver() {
         // (which flexes under the load), until the feet leave it.
         motion.y = hero.startFootY + posedBounds.min.y + boardDipPx(hero);
       }
+      if (p >= diveConfig.cameraNeutral) {
+        // Match the feet to the held waterline using the actual posed model,
+        // including the smaller responsive figure on mobile.
+        scene.updateMatrixWorld(true);
+        posedBounds.setFromObject(rootObj, true);
+        const landingY = hero.height * 0.66 + posedBounds.min.y
+          + smooth(diveConfig.impact, 1, p) * hero.figureHeight * 1.8;
+        motion.y += (landingY - motion.y) * smooth(diveConfig.cameraNeutral, diveConfig.impact, p);
+      }
       tumble.position.set(
         motion.x - hero.width / 2,
         hero.height / 2 - motion.y,
@@ -375,7 +384,14 @@ export default function HeroDiver() {
         ((1 - point.y) * hero.height) /
         2
       ).toFixed(2);
+      // The shared work heading sits across both sections. Clip the diver at
+      // the waterline so the section can cover it without trapping the heading
+      // inside a separate stacking context.
+      const waterHeight = Math.max(0, Math.min(hero.height, hero.waterline));
+      gl.setScissor(0, hero.height - waterHeight, hero.width, waterHeight);
+      gl.setScissorTest(true);
       gl.render(scene, camera);
+      gl.setScissorTest(false);
       // Hide the SVG only after this controller has actually drawn the model.
       hero.element.dataset.modelReady = "true";
       hero.element.dataset.modelFacing =

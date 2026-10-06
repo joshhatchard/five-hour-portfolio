@@ -3,10 +3,10 @@ import styles from "./About.module.css";
 
 export default function About() {
   return (
-    <section id="about" className={styles.section} aria-labelledby="about-heading">
+    <section id="about" className={styles.section} aria-label="About me">
       <div className={styles.grid}>
         <div className={styles.portraitColumn}>
-          <h2 id="about-heading" className={styles.label}>About</h2>
+          <p className={styles.label}>About</p>
           <figure className={styles.portrait}>
             <WarpImage
               src="/about/portrait-placeholder.svg"

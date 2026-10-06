@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import styles from "./Quote.module.css";
+import QuoteModel from "./QuoteModel";
 
 // Replace these placeholders with your own quotes.
 const quotes = [
@@ -32,7 +33,7 @@ export default function Quote() {
     const words = section.querySelectorAll('[data-quote-words]');
     const cta = section.querySelector('[data-quote-cta]');
     const hint = section.querySelector('[data-quote-hint]');
-    gsap.set(actor, { scale: 1, rotationY: 0, rotationZ: -12, y: 0 });
+    gsap.set(actor, { scale: 1, "--quote-spin": 0, rotationZ: -12, y: 0 });
     gsap.set(colour, { scale: 0 });
     gsap.set(words, { autoAlpha: 0, y: 32 });
     gsap.set(hint, { autoAlpha: 1 });
@@ -54,7 +55,7 @@ export default function Quote() {
       },
     });
     timeline
-      .to(actor, { rotationY: 720, rotationZ: 28, duration: 0.8 }, 0)
+      .to(actor, { "--quote-spin": 720, rotationZ: 28, duration: 0.8 }, 0)
       .to(actor, { scale: 2.5, duration: 0.35, ease: "power1.in" }, 0.08)
       .to(actor, { scale: 24, duration: 0.4, ease: "power2.in" }, 0.43)
       .to(hint, { autoAlpha: 0, duration: 0.1 }, 0.1)
@@ -68,7 +69,7 @@ export default function Quote() {
       // The blue figure reappears inside the matching fill, then spins down.
       .to(actor, { autoAlpha: 1, duration: 0.04 }, 1.94)
       .to(colour, { scale: 0, duration: 0.42, ease: "power2.inOut" }, 1.98)
-      .to(actor, { scale: 1, rotationY: 1440, rotationZ: 0, y: () => -Math.min(window.innerHeight * 0.2, 160), duration: 0.52, ease: "power2.out" }, 1.98);
+      .to(actor, { scale: 1, "--quote-spin": 1440, rotationZ: 0, y: () => -Math.min(window.innerHeight * 0.2, 160), duration: 0.52, ease: "power2.out" }, 1.98);
 
     timeline.eventCallback("onComplete", () => ctaReveal.play());
     timeline.eventCallback("onUpdate", () => {
@@ -86,9 +87,10 @@ export default function Quote() {
       <div className={styles.stage} data-quote-stage>
         <div className={styles.colour} data-quote-colour aria-hidden="true" />
         <div className={styles.actor} data-quote-actor aria-hidden="true">
+          <QuoteModel />
           <svg viewBox="0 0 160 240" className={styles.stickman}>
             <circle cx="80" cy="36" r="22" fill="currentColor" />
-            <path d="M80 71V147M80 92L32 123M80 92L128 123M80 147L43 211M80 147L117 211" fill="none" stroke="currentColor" strokeWidth="17" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M80 71V147M80 92L22 52M80 92L138 52M80 147L30 211M80 147L130 211" fill="none" stroke="currentColor" strokeWidth="17" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
         <p className={styles.hint} data-quote-hint aria-hidden="true">A change of perspective ↓</p>

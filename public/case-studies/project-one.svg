@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+  <rect width="1600" height="1000" fill="#d9d6cf"/>
+  <g transform="translate(800 500)" fill="#11120e">
+    <rect x="-38" y="-195" width="76" height="390" rx="16"/>
+    <rect x="-38" y="-195" width="76" height="390" rx="16" transform="rotate(60)"/>
+    <rect x="-38" y="-195" width="76" height="390" rx="16" transform="rotate(120)"/>
+    <rect x="-38" y="-195" width="76" height="55" fill="#d5fa48"/>
+  </g>
+  <g fill="#77766e" font-family="monospace" font-size="16"><text x="48" y="65">SELECTED WORK / 01</text><text x="48" y="952">PROJECT PREVIEW</text><text x="1380" y="952">PORTFOLIO</text></g>
+</svg>

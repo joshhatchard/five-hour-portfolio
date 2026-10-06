@@ -2,6 +2,7 @@ import { sampleDive } from "./divePose";
 
 export const diveConfig = {
   stageHeights: 4.4,
+  splashHoldHeights: 0.9,
   endWaterline: 0,
   impact: 0.85,
   cameraNeutral: 0.78,
@@ -71,8 +72,12 @@ export function flight(
   launchY?: number,
 ) {
   const p = state.progress;
-  const pose = sampleDive(p);
   const { launch, peak, impact } = diveConfig;
+  // Finish the authored second flip (the 11/12 entry key) before contact.
+  const poseProgress = p <= launch ? p : p < impact
+    ? mix(launch, 11 / 12, (p - launch) / (impact - launch))
+    : mix(11 / 12, 1, (p - impact) / (1 - impact));
+  const pose = sampleDive(poseProgress);
 
   const y0 = launchY ?? state.startFootY - hipHeight;
   const yPeak = y0 - diveConfig.jumpHeight * state.height;
