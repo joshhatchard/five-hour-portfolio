@@ -25,7 +25,7 @@ export default function Hero() {
               WITH <strong className={styles.codeWord}>CODE</strong>{" "}
               <span className={styles.codeBadge} aria-hidden="true">&lt;/&gt;</span>
             </span>
-            <span><span data-hero-copy>&amp; I&apos;M </span><strong className={styles.highlight} data-hero-send>FULL SEND</strong></span>
+            <span><span data-hero-copy>&amp; I&apos;M </span><strong className={styles.highlight} data-hero-send>FULL SEND!</strong></span>
           </h1>
           <p className={styles.description} data-hero-copy>
             Designer and developer, turning ideas into thoughtful digital experiences.
@@ -37,9 +37,31 @@ export default function Hero() {
         </div>
         <div className={styles.illustration} aria-hidden="true">
           <svg viewBox="0 0 600 480" className={styles.scene} data-hero-world>
-            <g data-parallax="0.3"><circle cx="155" cy="140" r="64" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.15" /></g>
-            <g data-parallax="0.5"><path d="M365 100q20-28 42 0q24-22 49 0" fill="none" stroke="currentColor" strokeWidth="3" opacity="0.2" /></g>
-            <g data-parallax="1"><path d="M0 375H460Q530 375 580 411" fill="none" stroke="currentColor" strokeWidth="10" strokeLinecap="round" /></g>
+            <defs>
+              <clipPath id="hero-left-birds">
+                <rect x="-20" y="20" width="270" height="240" />
+              </clipPath>
+            </defs>
+            <g data-parallax="0.5" data-fly-away opacity="0.5" clipPath="url(#hero-left-birds)">
+              <image
+                href="/hero/birds.png"
+                x="-20"
+                y="20"
+                width="480"
+                height="240"
+                preserveAspectRatio="xMidYMid meet"
+              />
+            </g>
+            <g data-parallax="1">
+              <image
+                href="/hero/boulder-crosshatch.png"
+                x="82"
+                y="360"
+                width="520"
+                height="365"
+                preserveAspectRatio="xMidYMin meet"
+              />
+            </g>
             <g className={styles.fallbackFigure}>
             <g fill="none" stroke="currentColor" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round">
               <path d="M322 215L350 300M332 241L385 229M332 241L382 257M350 300L327 334L340 373M350 300L354 337L378 373" />

@@ -59,6 +59,8 @@ export default function QuoteModel() {
       const degrees = parseFloat(style.getPropertyValue("--quote-spin")) || 0;
       spin.rotation.y = degrees * Math.PI / 180;
       material.uniforms.uSeed.value = Math.floor(degrees / 8) % 64;
+      material.uniforms.uFlat.value = parseFloat(style.getPropertyValue("--quote-flat")) || 0;
+      material.uniforms.uFinal.value = parseFloat(style.getPropertyValue("--quote-final")) || 0;
       renderer.render(scene, camera);
     };
     const renders = runtime.current.render;

@@ -1,10 +1,11 @@
+import type { ReactNode } from "react";
 import WarpImage from "./warp-grid/WarpImage";
 import styles from "./About.module.css";
 
-export default function About() {
+export default function About({ children }: { children?: ReactNode }) {
   return (
     <section id="about" className={styles.section} aria-label="About me">
-      <div className={styles.grid}>
+      <div className={styles.grid} data-about-wipe>
         <div className={styles.portraitColumn}>
           <p className={styles.label}>About</p>
           <figure className={styles.portrait}>
@@ -29,6 +30,7 @@ export default function About() {
           </p>
         </div>
       </div>
+      {children && <div className={styles.quoteMount}>{children}</div>}
     </section>
   );
 }

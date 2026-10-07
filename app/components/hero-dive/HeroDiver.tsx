@@ -23,6 +23,7 @@ import { useScrollRuntime } from "../warp-grid/ScrollProvider";
 import { createPoser } from "./poser";
 import { boardDipPx, diveConfig, flight, smooth } from "./controller";
 import { sampleDive } from "./divePose";
+import { VelocityEffects } from "./VelocityEffects";
 
 // Scroll-driven camera orbit around the diver for the whole dive.
 const ORBIT_TURNS = 1; // full 360° laps between ORBIT_START and ORBIT_END (use a whole number so it ends flat)
@@ -179,6 +180,7 @@ export default function HeroDiver() {
     let skin: ShaderMaterial | null = null;
     let eye: Mesh | null = null;
     const point = new Vector3();
+    const velocity = new VelocityEffects();
     const posedBounds = new Box3();
     // Hip height at the moment of take-off, measured from the posed model so the leap starts exactly where the planted pose ends.
     let launchKey = "";
@@ -359,6 +361,16 @@ export default function HeroDiver() {
       camera.updateProjectionMatrix();
       camera.updateMatrixWorld();
       scene.updateMatrixWorld(true);
+      tumble.getWorldPosition(point);
+      point.project(camera);
+      hero.element.dataset.velocityEffects = velocity.render(
+        gl,
+        hero.width,
+        hero.height,
+        point.x * hero.width / 2,
+        point.y * hero.height / 2,
+        p,
+      ) ? "true" : "false";
       hero.diverX = motion.x;
       hero.diverY = motion.y;
       hero.renderDom();
@@ -403,6 +415,7 @@ export default function HeroDiver() {
       state.backgroundRender.delete(draw);
       document.querySelector("#hero")?.removeAttribute("data-model-ready");
       if (root) disposeModel(root);
+      velocity.dispose();
       scene.clear();
     };
   }, [gl, runtime]);

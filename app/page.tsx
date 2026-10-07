@@ -16,9 +16,8 @@ export default function Home() {
         <WorkShowcase>
           <CaseStudies />
           <Creative />
-          <About />
+          <About><Quote /></About>
         </WorkShowcase>
-        <Quote />
       </main>
       <Footer />
     </>

@@ -1,10 +1,10 @@
 .section {
   position: relative;
   overflow: clip;
-  padding-top: clamp(12rem, 50svh, 36rem);
+  padding-top: clamp(18rem, calc(50svh + var(--heading-breathing-room)), 48rem);
   padding-inline: max(1.5rem, calc((100vw - 90rem) / 2));
   border-top: 1px solid #e5e5e5;
-  background: #faf9f3;
+  background: transparent;
 }
 
 .gallery {

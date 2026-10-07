@@ -82,7 +82,7 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
             if (animated) {
               hero.style.setProperty(
                 "--hero-scroll-height",
-                `${controller.height * (diveConfig.stageHeights + diveConfig.splashHoldHeights)}px`,
+                `${controller.height * diveConfig.stageHeights}px`,
               );
             }
             const rect = svg.getBoundingClientRect();
@@ -132,6 +132,7 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
             layers.forEach((layer) => {
               const factor = Number(layer.dataset.parallax);
               const board = factor === 1;
+              const fliesAway = layer.hasAttribute("data-fly-away");
               const fall = smooth(0.3, 0.5, p); // the board stays put until the diver is well clear of it
               const zoom = mix(1, controller.zoom, factor);
               const dx =
@@ -141,7 +142,9 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
                 controller.cameraY * factor * zoom +
                 (board
                   ? fall * controller.height * 0.85
-                  : -(1 - fade) * controller.height * factor * 0.3);
+                  : fliesAway
+                    ? -fall * controller.height * 1.2
+                    : -(1 - fade) * controller.height * factor * 0.3);
               const tx =
                 ((controller.width / 2 - sceneX) * (1 - zoom) + dx) /
                 sceneScale;
@@ -154,7 +157,7 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
                 `matrix(${zoom} 0 0 ${zoom} ${tx} ${ty})${board ? ` rotate(${fall * -15} 350 375) rotate(${boardAngle(p)} 0 375)` : ""}`,
               );
               layer.style.opacity = String(
-                board ? 1 - smooth(0.32, 0.5, p) : 1 - smooth(0.3, 0.55, p),
+                fliesAway ? 1 : board ? 1 - smooth(0.32, 0.5, p) : 1 - smooth(0.3, 0.55, p),
               );
             });
 
@@ -168,16 +171,19 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
             fill.style.transform = `rotate(${-3 * (1 - expand)}deg)`;
 
             highlight.style.backgroundColor = p > 0.04 ? "transparent" : "";
-            highlight.style.opacity = String(1 - smooth(0.9, 0.97, p));
+            // When the next section reaches the waterline, release the label
+            // upward with the scroll instead of dissolving it in place.
+            const labelExit = smooth(0.72, 0.92, p);
+            highlight.style.opacity = "1";
 
-            const textScale = Math.min(
-              (controller.width * 0.8) / badge.width,
-              (controller.height * 0.17) / badge.height,
-            );
-            const targetX = (controller.width - badge.width * textScale) / 2;
-            const targetY =
-              controller.height * 0.07 - Math.min(0, controller.stageTop);
-            highlight.style.transform = `translate(${(targetX - badge.left) * expand}px, ${(targetY - badge.top) * expand}px) scale(${mix(1, textScale, expand)}) rotate(${-3 * (1 - expand)}deg)`;
+            // Keep the title untouched before take-off. Once the flips start,
+            // park the label high on the left with a leftward tilt; the expanding
+            // lime fill above continues to use its original animation.
+            const labelMove = smooth(diveConfig.launch, 0.3, p);
+            const labelX = controller.width * 0.06;
+            const labelY = controller.height * 0.16;
+            const labelScale = mix(1, 3.6, labelMove);
+            highlight.style.transform = `translate(${(labelX - badge.left) * labelMove}px, ${(labelY - badge.top) * labelMove - controller.height * 1.15 * labelExit}px) scale(${labelScale}) rotate(${-3 - labelMove}deg)`;
 
             const t = clamp((p - diveConfig.impact) / (1 - diveConfig.impact));
             splash.style.opacity = p > diveConfig.impact && p < 1 ? "1" : "0";
@@ -214,18 +220,10 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
 
           const update = () => {
             if (animated) {
-              const { stageHeights, splashHoldHeights, impact } = diveConfig;
-              const distance = scrollProgress.value * (stageHeights + splashHoldHeights);
-              const impactDistance = stageHeights * impact;
-              const hold = clamp((distance - impactDistance) / splashHoldHeights);
-              controller.progress = distance < impactDistance
-                ? distance / stageHeights
-                : mix(impact, 1, hold);
-              // Keep the actual section edge at the landing height throughout
-              // the splash, then let normal scrolling bring the heading up.
-              water.style.transform = hold < 1
-                ? `translateY(${-controller.height * splashHoldHeights * (1 - hold)}px)`
-                : "";
+              // The splash completes inside the final stretch of the dive;
+              // there is no held landing interval before the next section.
+              controller.progress = scrollProgress.value;
+              water.style.transform = "";
             }
             const rect = hero.getBoundingClientRect();
             controller.stageTop = stage.getBoundingClientRect().top;
@@ -251,7 +249,7 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
                   trigger: hero,
                   start: "top top",
                   end: () =>
-                    `+=${controller.height * (diveConfig.stageHeights + diveConfig.splashHoldHeights)}`,
+                    `+=${controller.height * diveConfig.stageHeights}`,
                   scrub: true,
                   invalidateOnRefresh: true,
                   onRefresh: measure,
@@ -261,7 +259,7 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
 
           const pin = animated ? ScrollTrigger.create({
             trigger: hero, start: "top top",
-            end: () => `+=${controller.height * (diveConfig.stageHeights + diveConfig.splashHoldHeights)}`,
+            end: () => `+=${controller.height * diveConfig.stageHeights}`,
             pin: stage, pinSpacing: false,
           }) : null;
 

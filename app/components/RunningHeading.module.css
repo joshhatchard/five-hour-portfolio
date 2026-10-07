@@ -1,4 +1,19 @@
-.work { position: relative; }
+.work {
+  position: relative;
+  background: #000;
+  /* The heading finishes its 85vh scrub, then gets a clear reading beat. */
+  --heading-breathing-room: clamp(24rem, 65svh, 46rem);
+}
+.surface {
+  position: sticky;
+  top: 0;
+  z-index: 0;
+  height: 100svh;
+  margin-bottom: -100svh;
+  overflow: hidden;
+  background: #000;
+  pointer-events: none;
+}
 .heading {
   position: sticky;
   top: 0;

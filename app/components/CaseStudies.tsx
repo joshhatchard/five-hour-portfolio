@@ -1,4 +1,5 @@
 import Splash from "./hero-dive/Splash";
+import WarpImage from "./warp-grid/WarpImage";
 import styles from "./CaseStudies.module.css";
 
 // Replace the artwork and titles with finished case studies when ready.
@@ -18,9 +19,7 @@ export default function CaseStudies() {
           <article key={project.number} className={styles.project} aria-labelledby={`project-${project.number}`}>
             <figure className={styles.figure}>
               <div className={styles.artwork}>
-                {/* The image remains in normal document flow, above the opaque hero cover. */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={project.src} alt={project.alt} width={1600} height={1000} className={styles.image} loading="lazy" />
+                <WarpImage src={project.src} alt={project.alt} width={1600} height={1000} className={styles.image} />
                 <span className={styles.tag}>Case study</span>
               </div>
               <figcaption className={styles.caption}>

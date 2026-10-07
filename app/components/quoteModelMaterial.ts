@@ -1,8 +1,8 @@
 import { Mesh, ShaderMaterial, SkinnedMesh, Texture, Vector3, type Material, type Object3D } from "three";
 
-// Black & white pencil-sketch look (colours are authored in sRGB, 0..1).
-const INK_RGB: [number, number, number] = [17 / 255, 18 / 255, 14 / 255]; // #11120e
-const PAPER_RGB: [number, number, number] = [250 / 255, 249 / 255, 243 / 255]; // #faf9f3
+// The final zoom can blend this tonal lime treatment into one flat colour.
+const INK_RGB: [number, number, number] = [102 / 255, 132 / 255, 29 / 255]; // #66841d
+const PAPER_RGB: [number, number, number] = [213 / 255, 250 / 255, 72 / 255]; // #d5fa48
 const LIGHT_DIR: [number, number, number] = [-0.55, 0.75, 0.6]; // world-space light, so shading changes as the camera orbits
 const LINE_GAP = 6; // distance between hatch lines in CSS pixels (smaller = denser, darker)
 const OUTLINE = 0.3; // 0 = no outline, higher = thicker scribbled edge around the silhouette
@@ -31,6 +31,8 @@ const FRAGMENT = /* glsl */ `
   uniform float uGap;
   uniform float uOutline;
   uniform float uSeed;
+  uniform float uFlat;
+  uniform float uFinal;
   varying vec3 vNormal;
 
   float hash(vec2 p) {
@@ -94,8 +96,13 @@ const FRAGMENT = /* glsl */ `
 
     float coverage = max(shade, max(rim, ring));
 
-    // Hard threshold: every pixel is pure ink or pure paper, no grey in between.
-    gl_FragColor = vec4(coverage > 0.5 ? uInk : uPaper, 1.0);
+    vec3 shaded = coverage > 0.5 ? uInk : uPaper;
+    // Flatten only at the peak of the Quote zoom so the matching full-screen
+    // lime layer can take over without an edge.
+    vec3 zoomColour = mix(shaded, uPaper, uFlat);
+    // The CTA figure is white paper with the original ink sketching.
+    vec3 finalSketch = coverage > 0.5 ? vec3(17.0 / 255.0, 18.0 / 255.0, 14.0 / 255.0) : vec3(1.0);
+    gl_FragColor = vec4(mix(zoomColour, finalSketch, uFinal), 1.0);
   }
 `;
 
@@ -131,7 +138,8 @@ export function createStickmanMaterial(pixelRatio: number) {
             uGap: { value: LINE_GAP },
             uOutline: { value: OUTLINE },
             uSeed: { value: 0 },
+            uFlat: { value: 0 },
+            uFinal: { value: 0 },
           },
         });
 }
-

@@ -33,9 +33,12 @@ export default function WarpPlane({ entry }: { entry: WarpEntry }) {
     mesh.visible = false;
     mesh.frustumCulled = false;
     scene.add(mesh);
-    const measure = () => {
+    const measurePosition = () => {
       const bounds = image.getBoundingClientRect();
       rect = { left: bounds.left, top: bounds.top + window.scrollY, width: bounds.width, height: bounds.height };
+    };
+    const measure = () => {
+      measurePosition();
       if (image.naturalWidth && rect.height) {
         const imageAspect = image.naturalWidth / image.naturalHeight;
         const planeAspect = rect.width / rect.height;
@@ -55,6 +58,9 @@ export default function WarpPlane({ entry }: { entry: WarpEntry }) {
       image.style.removeProperty("opacity");
     });
     const update = () => {
+      // Cards may parallax independently, so the DOM media and its canvas
+      // counterpart need a fresh screen position on each shared scroll tick.
+      measurePosition();
       const top = rect.top - scrollState.scroll;
       mesh.visible = ready && rect.width > 0 && top < size.height + 100 && top + rect.height > -100;
       if (!mesh.visible) return;

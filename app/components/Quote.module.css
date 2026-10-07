@@ -1,8 +1,8 @@
 .section {
-  --quote-colour: #477dff;
+  --quote-colour: #d5fa48;
   position: relative;
   z-index: 12;
-  background: #faf9f3;
+  background: #11120d;
 }
 
 .stage {
@@ -11,16 +11,12 @@
   place-items: center;
   min-height: 100svh;
   overflow: hidden;
-  background: var(--quote-colour);
+  background: #11120d;
 }
 
 .colour {
   position: absolute;
-  top: calc(50% - 71vmax);
-  left: calc(50% - 71vmax);
-  width: 142vmax;
-  height: 142vmax;
-  border-radius: 50%;
+  inset: 0;
   background: var(--quote-colour);
   pointer-events: none;
 }
@@ -28,10 +24,11 @@
 .actor {
   display: none;
   position: absolute;
-  width: clamp(12rem, 25vw, 20rem);
+  width: clamp(9rem, 18vw, 15rem);
   aspect-ratio: 1;
-  color: #11120e;
-  transform-origin: center;
+  color: #d5fa48;
+  /* Anchor the takeover zoom on the model's head rather than its torso. */
+  transform-origin: 50% 16%;
   pointer-events: none;
 }
 
@@ -55,7 +52,7 @@
   z-index: 1;
   width: min(100% - 3rem, 68rem);
   padding-block: 4rem;
-  color: #10131b;
+  color: #11120d;
   text-align: center;
 }
 
@@ -74,16 +71,20 @@
   line-height: 1.02;
 }
 
-.section[data-animated="true"] { height: 617svh; }
+.section[data-animated="true"] { height: 460svh; }
 .section[data-animated="true"] .stage {
   position: sticky;
   top: 0;
   height: 100svh;
-  background: #faf9f3;
+  background: #11120d;
   perspective: 900px;
 }
 .section[data-animated="true"] .words,
 .section[data-animated="true"] .cta { grid-area: 1 / 1; }
+.section[data-quote-copy-locked="true"] .words {
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
 .section[data-animated="true"] .cta { margin-top: clamp(8rem, 22svh, 12rem); }
 .section[data-animated="true"] .actor,
 .section[data-animated="true"] .hint { display: block; }
@@ -101,16 +102,18 @@
 .cta {
   position: relative;
   z-index: 2;
-  width: min(100% - 3rem, 68rem);
+  width: min(92%, 110rem);
   padding-block: 3rem;
   text-align: center;
-  color: #10131b;
+  color: #faf9f5;
 }
 
 .cta h2 {
-  font-size: clamp(2rem, 5vw, 4.5rem);
-  line-height: 1.1;
-  letter-spacing: -0.045em;
+  font-size: clamp(2.25rem, 6vw, 6rem);
+  font-weight: 350;
+  line-height: 1.14;
+  letter-spacing: -0.055em;
+  white-space: nowrap;
 }
 
 .contactLinks {
@@ -128,3 +131,8 @@
 }
 
 .contactLinks a[aria-disabled="true"] { color: #77756f; }
+
+@media (max-width: 700px) {
+  .cta { width: calc(100% - 2rem); }
+  .cta h2 { white-space: normal; }
+}

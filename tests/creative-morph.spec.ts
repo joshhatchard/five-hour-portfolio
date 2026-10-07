@@ -13,14 +13,15 @@ for (const mobile of [false, true]) {
     await expect(heading).toHaveCount(1);
     await expect(page.locator('#case-studies h2, #creative h2, #about h2')).toHaveCount(0);
     await title.evaluate(el => el.setAttribute('data-original-node', 'true'));
-    for (const [selector, state, label] of [
-      ['#case-studies', 'cases', 'Big Thrills'],
-      ['#creative', 'creative', 'Hidden Gems'],
-      ['#about', 'about', 'WHO DIS?'],
-    ]) {
-      const start = await page.locator(selector).evaluate(el => el.getBoundingClientRect().top + scrollY - new DOMMatrixReadOnly(getComputedStyle(el).transform).m42);
+    for (const [selector, state, label, lead] of [
+      ['#case-studies', 'cases', 'Big Thrills', 0.55],
+      ['#creative', 'creative', 'Hidden Gems', 0.55],
+      ['#about', 'about', 'WHO DIS?', 0.55],
+    ] as const) {
+      const start = await page.locator(selector).evaluate((el, sectionLead) => el.getBoundingClientRect().top + scrollY
+        - new DOMMatrixReadOnly(getComputedStyle(el).transform).m42 - innerHeight * sectionLead, lead);
       const seek = async (progress: number) => {
-        await page.evaluate(y => window.scrollTo(0, y), start + 405 * progress + (progress === 1 ? 1 : 0));
+        await page.evaluate(y => window.scrollTo(0, y), start + 765 * progress + (progress === 1 ? 1 : 0));
         await expect.poll(async () => Number(await heading.getAttribute('data-progress'))).toBeCloseTo(progress, 2);
       };
       await seek(0.3);

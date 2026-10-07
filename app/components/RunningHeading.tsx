@@ -19,7 +19,10 @@ export type HeadingStep = {
 type Props = { steps: readonly HeadingStep[]; children: ReactNode };
 
 // The shared title follows scroll in both directions, without locking input.
-const TRANSITION_VIEWPORTS = 0.45;
+const TRANSITION_VIEWPORTS = 0.85;
+const NEXT_SECTION_LEAD_VIEWPORTS = 0.55;
+const COLOUR_TRANSITION_VIEWPORTS = 0.24;
+const SECTION_COLOURS = ["#000000", "#faf9f3", "#11120d"];
 export default function RunningHeading({ steps, children }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const first = steps[0];
@@ -27,15 +30,18 @@ export default function RunningHeading({ steps, children }: Props) {
   useGSAP(() => {
     gsap.registerPlugin(ScrollTrigger);
     const work = ref.current!;
+    const surface = work.querySelector<HTMLElement>("[data-work-surface]")!;
     const heading = work.querySelector<HTMLElement>("[data-work-heading]")!;
     const title = heading.querySelector("h2")!;
     const glyphs = Array.from(title.querySelectorAll<HTMLElement>("[data-glyph]"));
     const subtitle = heading.querySelector("p")!;
     const sections = steps.map(step => work.querySelector<HTMLElement>(step.target)!);
+    const aboutWipe = work.querySelector<HTMLElement>("[data-about-wipe]");
     const media = gsap.matchMedia();
     media.add({ reduced: "(prefers-reduced-motion: reduce)", animated: "(prefers-reduced-motion: no-preference)" }, context => {
       const reduced = Boolean(context.conditions?.reduced);
       let timeline: gsap.core.Timeline | undefined;
+      let colourTween: gsap.core.Tween | undefined;
       let active = -1;
       let swapAt = 0;
       let starts: number[] = [];
@@ -54,9 +60,18 @@ export default function RunningHeading({ steps, children }: Props) {
       };
       const build = (index: number) => {
         timeline?.kill();
+        colourTween?.kill();
         gsap.set([heading, title, ...glyphs, subtitle], { clearProps: "opacity,visibility,transform,filter" });
         setPhrase(Math.max(0, index - 1));
         timeline = gsap.timeline({ paused: true });
+        const from = SECTION_COLOURS[Math.max(0, index - 1)];
+        const to = SECTION_COLOURS[index];
+        colourTween = gsap.fromTo(surface, { backgroundColor: from }, {
+          backgroundColor: to,
+          duration: 1,
+          ease: "none",
+          paused: true,
+        });
         swapAt = 0;
         if (reduced) {
           if (index === 0) {
@@ -98,18 +113,31 @@ export default function RunningHeading({ steps, children }: Props) {
         }
         if (active !== index) build(index);
         const progress = gsap.utils.clamp(0, 1, (scroll - starts[index]) / (window.innerHeight * TRANSITION_VIEWPORTS));
+        const colourProgress = index === 0 ? 1 : gsap.utils.clamp(
+          0,
+          1,
+          (scroll - starts[index]) / (window.innerHeight * COLOUR_TRANSITION_VIEWPORTS),
+        );
         // Select copy from absolute progress, so fast jumps and reverse seeks
         // always pick the correct words without relying on timeline callbacks.
         timeline!.progress(progress, true);
+        colourTween!.progress(colourProgress, true);
         setPhrase(index > 0 && timeline!.time() < swapAt ? index - 1 : index);
-        gsap.set(heading, { autoAlpha: 1 });
+        // Let the opaque About card take over the screen instead of allowing
+        // the final shared title to remain behind it.
+        const wipeProgress = index === steps.length - 1 && aboutWipe
+          ? gsap.utils.clamp(0, 1, (scroll - (aboutWipe.getBoundingClientRect().top + scroll - window.innerHeight * 0.7)) / (window.innerHeight * 0.3))
+          : 0;
+        gsap.set(heading, { autoAlpha: 1 - wipeProgress });
         heading.dataset.state = progress < 1 ? "animating" : steps[index].id;
         heading.dataset.progress = progress.toFixed(3);
       };
       const measure = () => {
-        // Ignore the temporary splash translation when locating the first section.
+        // Ignore the temporary splash translation and begin every title as its
+        // section approaches the fold, keeping the sequence consistent.
         starts = sections.map(section => section.getBoundingClientRect().top + window.scrollY
-          - new DOMMatrixReadOnly(getComputedStyle(section).transform).m42);
+          - new DOMMatrixReadOnly(getComputedStyle(section).transform).m42
+          - window.innerHeight * NEXT_SECTION_LEAD_VIEWPORTS);
         render();
       };
       const trigger = ScrollTrigger.create({
@@ -122,14 +150,15 @@ export default function RunningHeading({ steps, children }: Props) {
       window.addEventListener("scroll", render, { passive: true });
       return () => {
         window.removeEventListener("scroll", render);
-        trigger.kill(); timeline?.kill();
-        gsap.set([heading, title, ...glyphs, subtitle], { clearProps: "all" });
+        trigger.kill(); timeline?.kill(); colourTween?.kill();
+        gsap.set([surface, heading, title, ...glyphs, subtitle], { clearProps: "all" });
       };
     });
     return () => media.revert();
   }, { scope: ref, dependencies: [steps], revertOnUpdate: true });
 
   return <div ref={ref} className={styles.work}>
+    <div className={styles.surface} data-work-surface aria-hidden="true" />
     <div className={`${styles.heading} ${font.className}`} data-work-heading>
       <div className={styles.copy}>
         <h2 aria-label={first.label} data-phase={first.id}>

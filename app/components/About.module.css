@@ -1,8 +1,9 @@
 .section {
   position: relative;
-  padding-top: 100svh;
+  padding-top: calc(100svh + var(--heading-breathing-room));
+  padding-bottom: 0;
   padding-inline: max(1.5rem, calc((100vw - 90rem) / 2));
-  background: #faf9f3;
+  background: transparent;
 }
 
 .grid {
@@ -10,10 +11,11 @@
   z-index: 2;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-  border: 1px solid #dddcd5;
-  background-color: #faf9f3;
+  border: 1px solid rgb(250 249 245 / 28%);
+  background-color: #11120d;
+  color: #faf9f5;
   /* Continue Creative's three-column guides behind the two-column content. */
-  background-image: linear-gradient(to right, transparent calc(66.666% - 0.5px), #dddcd5 calc(66.666% - 0.5px), #dddcd5 calc(66.666% + 0.5px), transparent calc(66.666% + 0.5px));
+  background-image: linear-gradient(to right, transparent calc(66.666% - 0.5px), rgb(250 249 245 / 22%) calc(66.666% - 0.5px), rgb(250 249 245 / 22%) calc(66.666% + 0.5px), transparent calc(66.666% + 0.5px));
 }
 
 .grid::before,
@@ -21,7 +23,7 @@
   content: "+";
   position: absolute;
   left: calc(33.333% - 5px);
-  color: #b6b5ae;
+  color: #d5fa48;
   font: 14px monospace;
 }
 
@@ -31,13 +33,14 @@
 .portraitColumn {
   min-width: 0;
   padding: clamp(2rem, 6vw, 6rem) clamp(1.5rem, 2.8vw, 2.5rem);
-  border-right: 1px solid #dddcd5;
+  border-right: 1px solid rgb(250 249 245 / 28%);
 }
 
 .label {
   margin: 0 0 3rem;
   font: 0.75rem monospace;
   text-transform: uppercase;
+  color: #d5fa48;
 }
 
 .portrait {
@@ -83,10 +86,17 @@
 
 .background {
   margin-top: 2rem;
-  color: #77756f;
+  color: #b6b5ae;
 }
 
-.background span { color: #282823; }
+.background span { color: #faf9f5; }
+
+.quoteMount {
+  width: 100vw;
+  margin-top: 0;
+  margin-left: 50%;
+  transform: translateX(-50%);
+}
 
 @media (max-width: 700px) {
   .section { padding-inline: 1rem; }
@@ -98,7 +108,7 @@
   .grid::after { left: -5px; }
   .portraitColumn {
     border-right: 0;
-    border-bottom: 1px solid #dddcd5;
+    border-bottom: 1px solid rgb(250 249 245 / 28%);
   }
   .portrait { max-width: 22rem; }
   .label { margin-bottom: 2rem; }

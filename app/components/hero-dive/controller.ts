@@ -2,7 +2,6 @@ import { sampleDive } from "./divePose";
 
 export const diveConfig = {
   stageHeights: 4.4,
-  splashHoldHeights: 0.9,
   endWaterline: 0,
   impact: 0.85,
   cameraNeutral: 0.78,
