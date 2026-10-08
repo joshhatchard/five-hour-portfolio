@@ -1,13 +1,12 @@
 "use client";
 
 import { useRef, type ReactNode } from "react";
-import { Geist } from "next/font/google";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import styles from "./RunningHeading.module.css";
+import { useScrollRuntime } from "./warp-grid/ScrollProvider";
 
-const font = Geist({ subsets: ["latin"] });
 export type HeadingStep = {
   id: string;
   target: string;
@@ -18,33 +17,85 @@ export type HeadingStep = {
 
 type Props = { steps: readonly HeadingStep[]; children: ReactNode };
 
-// The shared title follows scroll in both directions, without locking input.
+// The first title plays during a brief scroll lock; later titles follow scroll.
 const TRANSITION_VIEWPORTS = 0.85;
 const NEXT_SECTION_LEAD_VIEWPORTS = 0.55;
 const COLOUR_TRANSITION_VIEWPORTS = 0.24;
-const SECTION_COLOURS = ["#000000", "#faf9f3", "#11120d"];
+const SECTION_COLOURS = ["#11120d", "#ffffff", "#11120d"];
 export default function RunningHeading({ steps, children }: Props) {
+  const { runtime } = useScrollRuntime();
   const ref = useRef<HTMLDivElement>(null);
   const first = steps[0];
   const glyphCount = Math.max(...steps.map(step => step.words.join("").length));
   useGSAP(() => {
     gsap.registerPlugin(ScrollTrigger);
-    const work = ref.current!;
-    const surface = work.querySelector<HTMLElement>("[data-work-surface]")!;
-    const heading = work.querySelector<HTMLElement>("[data-work-heading]")!;
-    const title = heading.querySelector("h2")!;
+    const work = ref.current;
+    if (!work) return;
+    const surface = work.querySelector<HTMLElement>("[data-work-surface]");
+    const heading = work.querySelector<HTMLElement>("[data-work-heading]");
+    const title = heading?.querySelector("h2");
+    if (!surface || !heading || !title) return;
     const glyphs = Array.from(title.querySelectorAll<HTMLElement>("[data-glyph]"));
     const subtitle = heading.querySelector("p")!;
-    const sections = steps.map(step => work.querySelector<HTMLElement>(step.target)!);
+    const sections = steps.map(step => work.querySelector<HTMLElement>(step.target));
+    if (sections.some((section) => !section)) return;
     const aboutWipe = work.querySelector<HTMLElement>("[data-about-wipe]");
     const media = gsap.matchMedia();
     media.add({ reduced: "(prefers-reduced-motion: reduce)", animated: "(prefers-reduced-motion: no-preference)" }, context => {
       const reduced = Boolean(context.conditions?.reduced);
       let timeline: gsap.core.Timeline | undefined;
+      let introExit: gsap.core.Timeline | undefined;
       let colourTween: gsap.core.Tween | undefined;
       let active = -1;
       let swapAt = 0;
       let starts: number[] = [];
+      let alive = true;
+      let introDone = false;
+      let reverseArmed = false;
+      let locked = false;
+      let lockedY = 0;
+      let resumeLenis = false;
+      let nudge: gsap.core.Tween | undefined;
+      let nudging = false;
+      const cancelNudge = () => {
+        nudge?.kill();
+        if (nudging) runtime.current.lenis?.scrollTo(window.scrollY, { immediate: true });
+        nudging = false;
+      };
+      let previousScroll = window.scrollY;
+      let reverseComplete = false;
+      let reverseReleaseY = 0;
+      let awaitingExit = false;
+      const continueIntro = () => {
+        if (!locked || !awaitingExit) return;
+        awaitingExit = false;
+        delete heading.dataset.awaitingExit;
+        introExit?.play(0);
+      };
+      const preventScroll = (event: Event) => {
+        event.preventDefault();
+        continueIntro();
+      };
+      const preventKeyScroll = (event: KeyboardEvent) => {
+        if (["ArrowDown", "ArrowUp", "PageDown", "PageUp", "Home", "End", " "].includes(event.key)) {
+          event.preventDefault();
+          continueIntro();
+        }
+      };
+      const release = () => {
+        locked = false;
+        window.removeEventListener("wheel", preventScroll, true);
+        window.removeEventListener("touchmove", preventScroll, true);
+        window.removeEventListener("keydown", preventKeyScroll, true);
+        if (resumeLenis) runtime.current.lenis?.start();
+        resumeLenis = false;
+        delete heading.dataset.scrollLocked;
+      };
+      const moveScroll = (y: number) => {
+        lockedY = y;
+        if (runtime.current.lenis) runtime.current.lenis.scrollTo(y, { immediate: true, force: true });
+        else window.scrollTo({ top: y, behavior: "instant" });
+      };
       const setPhrase = (next: number) => {
         const step = steps[next];
         const phrase = step.words.join("");
@@ -60,6 +111,7 @@ export default function RunningHeading({ steps, children }: Props) {
       };
       const build = (index: number) => {
         timeline?.kill();
+        introExit?.kill();
         colourTween?.kill();
         gsap.set([heading, title, ...glyphs, subtitle], { clearProps: "opacity,visibility,transform,filter" });
         setPhrase(Math.max(0, index - 1));
@@ -87,12 +139,12 @@ export default function RunningHeading({ steps, children }: Props) {
           const firstWord = glyphs.slice(0, first.words[0].length);
           const secondWord = glyphs.slice(first.words[0].length, first.words.join("").length);
           gsap.set([...glyphs, subtitle], { opacity: 0 });
-          timeline.fromTo(firstWord, { yPercent: -160, scaleY: 1.4 }, { yPercent: 0, scaleY: 1, opacity: 1, duration: 0.22, ease: "power4.in" })
-            .to(firstWord, { scaleY: 0.8, scaleX: 1.08, duration: 0.07 })
-            .to(firstWord, { scaleY: 1, scaleX: 1, duration: 0.09 })
-            .fromTo(secondWord, { scaleY: 0.15, scaleX: 1.35 }, { opacity: 1, scaleY: 1.5, scaleX: 0.8, duration: 0.16, stagger: 0.055, ease: "power2.out" }, 0.38)
-            .to(secondWord, { scaleY: 1, scaleX: 1, duration: 0.3, stagger: 0.055, ease: "power3.out" }, 0.54)
-            .to(subtitle, { opacity: 0.65, duration: 0.25 }, 0.9);
+          timeline
+            .fromTo(firstWord, { xPercent: -100, opacity: 0 }, { xPercent: 0, opacity: 1, duration: 0.26, ease: "power3.out" })
+            .fromTo(secondWord, { xPercent: -70, opacity: 0 }, { xPercent: 0, opacity: 1, duration: 0.26, ease: "power3.out" }, "+=0.1")
+            .to(subtitle, { opacity: 0.65, duration: 0.18 }, "-=0.04");
+          introExit = gsap.timeline({ paused: true })
+            .to([title, subtitle], { xPercent: -125, opacity: 0, duration: 0.2, ease: "power4.in" });
         } else {
           timeline.to(glyphs, { scaleX: 0.08, scaleY: 1.4, opacity: 0, filter: "blur(3px)", duration: 0.28, stagger: 0.02, ease: "power2.in" }, 0.12)
             .to(subtitle, { opacity: 0, duration: 0.2 }, 0.12);
@@ -103,15 +155,114 @@ export default function RunningHeading({ steps, children }: Props) {
         active = index;
       };
       const render = () => {
+        if (!alive || !work.isConnected || !heading.isConnected || !surface.isConnected) return;
+        if (locked) {
+          if (Math.abs(window.scrollY - lockedY) > 1) {
+            // Scrollbar drags and native scrolling do not emit wheel events.
+            // They must also be able to advance the visible title.
+            continueIntro();
+            moveScroll(lockedY);
+          }
+          return;
+        }
         const scroll = window.scrollY;
+        const scrollingBack = scroll < previousScroll - 0.5;
+        previousScroll = scroll;
+        if (introDone && scroll > starts[0] + 48) reverseArmed = true;
         let index = -1;
         starts.forEach((start, i) => { if (scroll >= start) index = i; });
+        // Lenis can cross the exact section boundary in one frame. Keep a
+        // small reverse-entry buffer so the title cannot be skipped on the
+        // way back toward the hero.
+        if (index < 0 && introDone && scrollingBack && scroll >= starts[0] - 160) index = 0;
+        // A completed pass stays completed around the boundary, including
+        // subpixel layout changes and browser scroll-position rounding.
+        if (index < 0 && (introDone || reverseComplete) && scroll >= starts[0] - 2) index = 0;
         if (index < 0) {
+          introDone = false;
+          reverseArmed = false;
+          reverseComplete = false;
+          cancelNudge();
           gsap.set(heading, { autoAlpha: 0 });
           heading.dataset.state = "before";
           return;
         }
         if (active !== index) build(index);
+        if (index === 0 && !reduced) {
+          colourTween!.progress(1, true);
+          if (reverseComplete) {
+            // Leave room to travel toward the hero without immediately relocking.
+            if (scroll <= reverseReleaseY + 32) {
+              gsap.set(heading, { autoAlpha: 0 });
+              return;
+            }
+            reverseComplete = false;
+            introDone = false;
+          }
+          const reverse = introDone && reverseArmed && scrollingBack && scroll <= starts[0] + 8;
+          if (!reverse && (introDone || scroll > starts[0] + window.innerHeight)) {
+            introDone = true;
+            timeline!.progress(1, true);
+            gsap.set(heading, { autoAlpha: 0 });
+            return;
+          }
+          cancelNudge();
+          locked = true;
+          heading.dataset.scrollLocked = "true";
+          resumeLenis = Boolean(runtime.current.lenis && !runtime.current.lenis.isStopped);
+          runtime.current.lenis?.stop();
+          window.addEventListener("wheel", preventScroll, { passive: false, capture: true });
+          window.addEventListener("touchmove", preventScroll, { passive: false, capture: true });
+          window.addEventListener("keydown", preventKeyScroll, true);
+          // Both directions pause at the same point: the moment Big Thrills
+          // reaches the top of the viewport.
+          moveScroll(starts[0]);
+          gsap.set(heading, { autoAlpha: 1 });
+          timeline!.eventCallback("onComplete", null);
+          timeline!.eventCallback("onReverseComplete", null);
+          if (reverse) {
+            reverseArmed = false;
+            awaitingExit = false;
+            introExit!.eventCallback("onReverseComplete", () => {
+              timeline!.eventCallback("onReverseComplete", () => {
+                reverseComplete = true;
+                reverseReleaseY = window.scrollY;
+                previousScroll = window.scrollY;
+                gsap.set(heading, { autoAlpha: 0 });
+                release();
+              });
+              timeline!.progress(1, true).reverse();
+            });
+            introExit!.progress(1, true).reverse();
+            return;
+          }
+          timeline!.eventCallback("onComplete", () => {
+            awaitingExit = true;
+            heading.dataset.awaitingExit = "true";
+          });
+          introExit!.eventCallback("onComplete", () => {
+            awaitingExit = false;
+            delete heading.dataset.awaitingExit;
+            introDone = true;
+            previousScroll = window.scrollY;
+            release();
+            // Only help a resting viewer: fresh input cancels this small nudge.
+            nudge = gsap.delayedCall(0.25, () => {
+              if (!runtime.current.lenis) return;
+              const distance = window.innerHeight / 3;
+              nudging = true;
+              runtime.current.lenis.scrollTo(window.scrollY + distance, {
+                duration: 0.65,
+                lerp: 0,
+                easing: t => 1 - (1 - t) ** 3,
+                onComplete: () => { nudging = false; },
+              });
+            });
+            render();
+          });
+          timeline!.play(0);
+          return;
+        }
         const progress = gsap.utils.clamp(0, 1, (scroll - starts[index]) / (window.innerHeight * TRANSITION_VIEWPORTS));
         const colourProgress = index === 0 ? 1 : gsap.utils.clamp(
           0,
@@ -125,7 +276,7 @@ export default function RunningHeading({ steps, children }: Props) {
         setPhrase(index > 0 && timeline!.time() < swapAt ? index - 1 : index);
         // Let the opaque About card take over the screen instead of allowing
         // the final shared title to remain behind it.
-        const wipeProgress = index === steps.length - 1 && aboutWipe
+        const wipeProgress = index === steps.length - 1 && aboutWipe?.isConnected
           ? gsap.utils.clamp(0, 1, (scroll - (aboutWipe.getBoundingClientRect().top + scroll - window.innerHeight * 0.7)) / (window.innerHeight * 0.3))
           : 0;
         gsap.set(heading, { autoAlpha: 1 - wipeProgress });
@@ -133,11 +284,15 @@ export default function RunningHeading({ steps, children }: Props) {
         heading.dataset.progress = progress.toFixed(3);
       };
       const measure = () => {
+        if (!alive || !work.isConnected) return;
         // Ignore the temporary splash translation and begin every title as its
         // section approaches the fold, keeping the sequence consistent.
-        starts = sections.map(section => section.getBoundingClientRect().top + window.scrollY
-          - new DOMMatrixReadOnly(getComputedStyle(section).transform).m42
-          - window.innerHeight * NEXT_SECTION_LEAD_VIEWPORTS);
+        starts = sections.map((section, index) => section!.getBoundingClientRect().top + window.scrollY
+          - new DOMMatrixReadOnly(getComputedStyle(section!).transform).m42
+          - window.innerHeight * (index === 0 ? 0 : NEXT_SECTION_LEAD_VIEWPORTS));
+        // Native scroll positions may use whole pixels; never lock just above
+        // the fractional boundary and accidentally reset the completed pass.
+        starts[0] = Math.ceil(starts[0]);
         render();
       };
       const trigger = ScrollTrigger.create({
@@ -147,11 +302,22 @@ export default function RunningHeading({ steps, children }: Props) {
         onRefresh: measure,
       });
       measure();
+      window.addEventListener("wheel", cancelNudge, { capture: true, passive: true });
+      window.addEventListener("touchstart", cancelNudge, { capture: true, passive: true });
+      window.addEventListener("keydown", cancelNudge, true);
       window.addEventListener("scroll", render, { passive: true });
       return () => {
+        alive = false;
+        cancelNudge();
+        window.removeEventListener("wheel", cancelNudge, true);
+        window.removeEventListener("touchstart", cancelNudge, true);
+        window.removeEventListener("keydown", cancelNudge, true);
         window.removeEventListener("scroll", render);
-        trigger.kill(); timeline?.kill(); colourTween?.kill();
-        gsap.set([surface, heading, title, ...glyphs, subtitle], { clearProps: "all" });
+        release();
+        trigger.kill(); timeline?.kill(); introExit?.kill(); colourTween?.kill();
+        if (surface.isConnected && heading.isConnected) {
+          gsap.set([surface, heading, title, ...glyphs, subtitle], { clearProps: "all" });
+        }
       };
     });
     return () => media.revert();
@@ -159,7 +325,7 @@ export default function RunningHeading({ steps, children }: Props) {
 
   return <div ref={ref} className={styles.work}>
     <div className={styles.surface} data-work-surface aria-hidden="true" />
-    <div className={`${styles.heading} ${font.className}`} data-work-heading>
+    <div className={styles.heading} data-work-heading>
       <div className={styles.copy}>
         <h2 aria-label={first.label} data-phase={first.id}>
           {Array.from({ length: glyphCount }, (_, i) => <span

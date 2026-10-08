@@ -23,7 +23,6 @@ import { useScrollRuntime } from "../warp-grid/ScrollProvider";
 import { createPoser } from "./poser";
 import { boardDipPx, diveConfig, flight, smooth } from "./controller";
 import { sampleDive } from "./divePose";
-import { VelocityEffects } from "./VelocityEffects";
 
 // Scroll-driven camera orbit around the diver for the whole dive.
 const ORBIT_TURNS = 1; // full 360° laps between ORBIT_START and ORBIT_END (use a whole number so it ends flat)
@@ -34,8 +33,8 @@ const ORBIT_END = diveConfig.cameraNeutral; // progress where it finishes back o
 const CAM_DIST = 1000;
 
 // Black & white pencil-sketch look (colours are authored in sRGB, 0..1).
-const INK_RGB: [number, number, number] = [17 / 255, 18 / 255, 14 / 255]; // #11120e
-const PAPER_RGB: [number, number, number] = [250 / 255, 249 / 255, 243 / 255]; // #faf9f3
+const INK_RGB: [number, number, number] = [17 / 255, 18 / 255, 13 / 255]; // #11120d
+const PAPER_RGB: [number, number, number] = [1, 1, 1]; // #ffffff
 const LIGHT_DIR: [number, number, number] = [-0.55, 0.75, 0.6]; // world-space light, so shading changes as the camera orbits
 const LINE_GAP = 6; // distance between hatch lines in CSS pixels (smaller = denser, darker)
 const OUTLINE = 0.3; // 0 = no outline, higher = thicker scribbled edge around the silhouette
@@ -180,7 +179,6 @@ export default function HeroDiver() {
     let skin: ShaderMaterial | null = null;
     let eye: Mesh | null = null;
     const point = new Vector3();
-    const velocity = new VelocityEffects();
     const posedBounds = new Box3();
     // Hip height at the moment of take-off, measured from the posed model so the leap starts exactly where the planted pose ends.
     let launchKey = "";
@@ -361,16 +359,6 @@ export default function HeroDiver() {
       camera.updateProjectionMatrix();
       camera.updateMatrixWorld();
       scene.updateMatrixWorld(true);
-      tumble.getWorldPosition(point);
-      point.project(camera);
-      hero.element.dataset.velocityEffects = velocity.render(
-        gl,
-        hero.width,
-        hero.height,
-        point.x * hero.width / 2,
-        point.y * hero.height / 2,
-        p,
-      ) ? "true" : "false";
       hero.diverX = motion.x;
       hero.diverY = motion.y;
       hero.renderDom();
@@ -415,7 +403,6 @@ export default function HeroDiver() {
       state.backgroundRender.delete(draw);
       document.querySelector("#hero")?.removeAttribute("data-model-ready");
       if (root) disposeModel(root);
-      velocity.dispose();
       scene.clear();
     };
   }, [gl, runtime]);

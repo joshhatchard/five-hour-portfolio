@@ -5,7 +5,6 @@ import CaseStudies from "./components/CaseStudies";
 import Creative from "./components/Creative";
 import About from "./components/About";
 import Quote from "./components/Quote";
-import Footer from "./components/Footer";
 
 export default function Home() {
   return (
@@ -19,7 +18,6 @@ export default function Home() {
           <About><Quote /></About>
         </WorkShowcase>
       </main>
-      <Footer />
     </>
   );
 }

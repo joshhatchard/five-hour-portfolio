@@ -35,10 +35,43 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
         hero.querySelectorAll<HTMLElement>("[data-hero-copy]"),
       );
       const splash = water.querySelector<SVGSVGElement>("[data-hero-splash]")!;
-      const drops = Array.from(splash.querySelectorAll("[data-splash-drop]"));
-      const rings = Array.from(splash.querySelectorAll("[data-splash-ring]"));
-      const bump = splash.querySelector("[data-splash-bump]")!;
+      const crownBack = splash.querySelector<SVGGElement>("[data-splash-crown-back]")!;
+      const crownFront = splash.querySelector<SVGGElement>("[data-splash-crown-front]")!;
+      const starbursts = Array.from(splash.querySelectorAll<SVGGElement>("[data-splash-starburst]"));
+      const particles = Array.from(splash.querySelectorAll<SVGGElement>("[data-splash-particle]"));
       const media = gsap.matchMedia();
+      const setResponsiveLayout = () => {
+        const width = document.documentElement.clientWidth;
+        const height = window.innerHeight;
+        const navHeight = document.querySelector(".navbar")?.getBoundingClientRect().height ?? 72;
+        const edgeSpace = width <= 700 ? 8 : 16;
+        hero.style.setProperty("--hero-nav-space", `${navHeight + edgeSpace}px`);
+        // Portrait compositions have room for a separate scene below the copy.
+        // Landscape keeps the two elements beside one another, even on phones.
+        const stacked = height / width >= 1.05;
+        hero.dataset.heroLayout = stacked ? "stacked" : "split";
+        const copyBlock = highlight.closest("h1")!.parentElement!;
+        const title = highlight.closest("h1")!;
+        const measuredCopy = stacked ? title : copyBlock;
+        const savedTransform = highlight.style.transform;
+        highlight.style.transform = "none";
+        const availableHeight = Math.max(120, height - navHeight - edgeSpace * 2);
+        const copyBudget = stacked ? availableHeight * 0.56 : availableHeight * 0.9;
+        // In the split layout, size the heading to its text column as well as
+        // the available height, leaving room for description and actions.
+        let size = stacked
+          ? Math.min(width * 0.105, 64)
+          : Math.min(copyBlock.clientWidth * 0.115, availableHeight * 0.13, 100);
+        size = Math.max(28, size);
+        hero.style.setProperty("--hero-title-size", `${size}px`);
+        // Fit actual font metrics after wrapping; never scale the whole page.
+        while (size > 28 && (measuredCopy.offsetHeight > copyBudget || title.scrollWidth > measuredCopy.clientWidth)) {
+          size = Math.max(28, size - 1);
+          hero.style.setProperty("--hero-title-size", `${size}px`);
+        }
+        highlight.style.transform = savedTransform;
+      };
+      setResponsiveLayout();
 
       media.add(
         {
@@ -75,8 +108,13 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
             sceneY = 0,
             sceneScale = 1;
           let badge = { left: 0, top: 0, width: 0, height: 0 };
+          let labelInset = 16;
+          let labelTop = 88;
 
           const measure = () => {
+            // Layout must settle before the SVG anchors and model are measured,
+            // regardless of which resize/refresh listener ran first.
+            setResponsiveLayout();
             controller.width = document.documentElement.clientWidth;
             controller.height = window.innerHeight;
             if (animated) {
@@ -87,10 +125,10 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
             }
             const rect = svg.getBoundingClientRect();
             const stageRect = stage.getBoundingClientRect();
-            sceneScale = Math.min(rect.width / 600, rect.height / 480);
-            sceneX = rect.left + (rect.width - 600 * sceneScale) / 2;
+            sceneScale = Math.min(rect.width / 600, rect.height / svg.viewBox.baseVal.height);
+            sceneX = rect.left - stageRect.left + (rect.width - 600 * sceneScale) / 2;
             sceneY =
-              rect.top - stageRect.top + (rect.height - 480 * sceneScale) / 2;
+              rect.top - stageRect.top + (rect.height - svg.viewBox.baseVal.height * sceneScale) / 2;
             controller.startX = sceneX + 350 * sceneScale;
             controller.startFootY = sceneY + 375 * sceneScale;
             controller.figureHeight = 208 * sceneScale;
@@ -107,6 +145,8 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
             highlight.style.transform = saved;
 
             const tokens = getComputedStyle(hero);
+            labelInset = (controller.width - hero.querySelector<HTMLElement>("h1")!.parentElement!.parentElement!.clientWidth) / 2;
+            labelTop = (document.querySelector(".navbar")?.getBoundingClientRect().height ?? 72) + (controller.width <= 700 ? 8 : 16);
             controller.ink = tokens.color;
             water.style.setProperty("--hero-ink", controller.ink);
             water.style.setProperty(
@@ -157,7 +197,7 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
                 `matrix(${zoom} 0 0 ${zoom} ${tx} ${ty})${board ? ` rotate(${fall * -15} 350 375) rotate(${boardAngle(p)} 0 375)` : ""}`,
               );
               layer.style.opacity = String(
-                fliesAway ? 1 : board ? 1 - smooth(0.32, 0.5, p) : 1 - smooth(0.3, 0.55, p),
+                fliesAway ? fade : board ? 1 - smooth(0.32, 0.5, p) : 1 - smooth(0.3, 0.55, p),
               );
             });
 
@@ -168,7 +208,7 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
             fill.style.height = `${mix(badge.height, controller.height, expand)}px`;
             fill.style.opacity = p > 0.04 ? "1" : "0";
             fill.style.transformOrigin = "left top";
-            fill.style.transform = `rotate(${-3 * (1 - expand)}deg)`;
+            fill.style.transform = "none";
 
             highlight.style.backgroundColor = p > 0.04 ? "transparent" : "";
             // When the next section reaches the waterline, release the label
@@ -176,46 +216,28 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
             const labelExit = smooth(0.72, 0.92, p);
             highlight.style.opacity = "1";
 
-            // Keep the title untouched before take-off. Once the flips start,
-            // park the label high on the left with a leftward tilt; the expanding
-            // lime fill above continues to use its original animation.
+            // Expand into a centred, full-width title below the navigation.
             const labelMove = smooth(diveConfig.launch, 0.3, p);
-            const labelX = controller.width * 0.06;
-            const labelY = controller.height * 0.16;
-            const labelScale = mix(1, 3.6, labelMove);
-            highlight.style.transform = `translate(${(labelX - badge.left) * labelMove}px, ${(labelY - badge.top) * labelMove - controller.height * 1.15 * labelExit}px) scale(${labelScale}) rotate(${-3 - labelMove}deg)`;
+            const targetWidth = controller.width - labelInset * 2;
+            const labelScale = mix(1, targetWidth / Math.max(1, badge.width), labelMove);
+            highlight.style.transform = `translate(${(labelInset - badge.left) * labelMove}px, ${(labelTop - badge.top) * labelMove - controller.height * 1.15 * labelExit}px) scale(${labelScale})`;
 
             const t = clamp((p - diveConfig.impact) / (1 - diveConfig.impact));
             splash.style.opacity = p > diveConfig.impact && p < 1 ? "1" : "0";
-
-            drops.forEach((drop, index) => {
-              const seed = ((index * 73 + 19) % 101) / 100;
-              const side = index % 2 ? -1 : 1;
-              const x = side * (55 + seed * 175) * t;
-              const y = -(80 + seed * 140) * 4 * t * (1 - t);
-              drop.setAttribute("cx", String(x));
-              drop.setAttribute("cy", String(y));
-              drop.setAttribute(
-                "r",
-                String((3 + seed * 4) * Math.sin(Math.PI * t)),
-              );
+            const crownPop = smooth(0, 0.07, t);
+            const accentPop = smooth(0.04, 0.16, t);
+            const arrive = smooth(0.04, 0.18, t);
+            const burst = Math.sin(t * Math.PI);
+            crownBack.setAttribute("transform", `scale(${crownPop})`);
+            crownFront.setAttribute("transform", `scale(${crownPop})`);
+            starbursts.forEach((starburst, index) => {
+              const direction = index ? -1 : 1;
+              starburst.setAttribute("transform", `translate(${direction * 48 * (1 - arrive)} ${-42 * burst}) scale(${accentPop})`);
             });
-
-            rings.forEach((ring, index) => {
-              const phase = clamp((t - index * 0.12) / (1 - index * 0.12));
-              ring.setAttribute("rx", String(20 + phase * 180));
-              ring.setAttribute("ry", String(2 + phase * 15));
-              ring.setAttribute(
-                "opacity",
-                String(phase > 0 ? (1 - phase) * 0.7 : 0),
-              );
+            particles.forEach((particle, index) => {
+              const direction = index ? -1 : 1;
+              particle.setAttribute("transform", `translate(${direction * (62 * (1 - arrive) + 38 * burst)} ${-64 * burst}) scale(${accentPop})`);
             });
-
-            bump.setAttribute(
-              "d",
-              `M-85 0 Q0 ${-Math.sin(t * Math.PI) * 45} 85 0`,
-            );
-            bump.setAttribute("opacity", String(1 - t));
           };
 
           const update = () => {
@@ -257,31 +279,30 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
               })
             : null;
 
-          const pin = animated ? ScrollTrigger.create({
-            trigger: hero, start: "top top",
-            end: () => `+=${controller.height * diveConfig.stageHeights}`,
-            pin: stage, pinSpacing: false,
-          }) : null;
-
           const refresh = () => {
             measure();
             ScrollTrigger.refresh();
           };
           window.addEventListener("resize", refresh);
+          const sceneObserver = new ResizeObserver(() => {
+            measure();
+            update();
+          });
+          sceneObserver.observe(svg);
 
           let alive = true;
           document.fonts.ready.then(() => {
-            if (alive) refresh();
+            if (alive) { setResponsiveLayout(); refresh(); }
           });
           refresh();
           update();
 
           return () => {
             alive = false;
-            pin?.kill();
             tween?.kill();
             water.style.removeProperty("transform");
             window.removeEventListener("resize", refresh);
+            sceneObserver.disconnect();
             scrollState.heroes.delete(controller);
             scrollState.update.delete(update);
             scrollState.refresh.delete(measure);
@@ -308,7 +329,7 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
       media.add("(prefers-reduced-motion: reduce)", () => {
         gsap.fromTo(
           stage,
-          { backgroundColor: "#faf9f3" },
+          { backgroundColor: "#ffffff" },
           {
             backgroundColor:
               getComputedStyle(hero).getPropertyValue("--hero-lime"),
@@ -326,6 +347,7 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
       window.addEventListener("hero-renderer-unavailable", fallback);
       return () => {
         window.removeEventListener("hero-renderer-unavailable", fallback);
+        delete hero.dataset.heroLayout;
         media.revert();
       };
     },

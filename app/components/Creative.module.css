@@ -1,18 +1,15 @@
 .section {
   position: relative;
   overflow: clip;
-  padding-top: clamp(18rem, calc(50svh + var(--heading-breathing-room)), 48rem);
-  padding-inline: max(1.5rem, calc((100vw - 90rem) / 2));
-  border-top: 1px solid #e5e5e5;
+  padding-top: 0;
+  padding-inline: var(--page-gutter);
   background: transparent;
 }
 
 .gallery {
   position: relative;
   z-index: 2;
-  padding-block: 75svh 30svh;
-}
-
-@media (max-width: 700px) {
-  .section { padding-inline: 1rem; }
+  /* Offset the first card's authored top margin so it reaches the fold
+     as the Hidden Gems title finishes its reveal. */
+  padding: calc(100svh + var(--heading-breathing-room) - 4rem) 0 30svh;
 }

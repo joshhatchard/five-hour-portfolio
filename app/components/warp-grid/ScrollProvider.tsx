@@ -9,6 +9,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import type { HeroController } from "../hero-dive/controller";
 import { warpConfig } from "./config";
+import LoadingScreen from "../LoadingScreen";
 
 const WarpCanvas = dynamic(() => import("./WarpCanvas"), { ssr: false });
 const motionQuery = "(prefers-reduced-motion: no-preference)";
@@ -139,6 +140,7 @@ export default function ScrollProvider({ children }: { children: ReactNode }) {
     <ScrollContext.Provider value={value}>
       {children}
       <WarpCanvas />
+      <LoadingScreen runtime={runtime} />
     </ScrollContext.Provider>
   );
 }

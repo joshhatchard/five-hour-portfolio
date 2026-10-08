@@ -14,7 +14,7 @@ function GridItem({ work }: { work: CreativeWork }) {
         <figure className={styles.figure}>
           <WarpImage src={work.src} alt={work.alt} width={800} height={600} className={styles.image} />
           <figcaption className={styles.caption}>
-          <h3 className="m-0 font-normal">{work.title}</h3>
+          <h3>{work.title}</h3>
           <span>{work.tag}</span>
           </figcaption>
         </figure>

@@ -1,9 +1,12 @@
-export default function Footer() {
+export default function Footer({ className = "" }: { className?: string }) {
   return (
-    <footer className="footer">
-      <div className="container">
-        <p>Footer</p>
-        <p className="mt-3 text-xs"><a href="https://sketchfab.com/3d-models/free-pack-stick-man-rigged-29e53f85cf1641c7a602af7fc02356b2" className="underline">“Free Pack - Stick Man (Rigged)”</a> by PolyOne Studio · <a href="https://creativecommons.org/licenses/by/4.0/" className="underline">CC BY 4.0</a> · posed and recoloured for this site.</p>
+    <footer className={`footer ${className}`.trim()}>
+      <div className="siteContainer">
+        <p>Josh Hatchard © 2026</p>
+        <div className="footerRight">
+          <p>Live the most</p>
+        </div>
+        <a className="footerBack" href="#hero">Back to top <span aria-hidden="true">↑</span></a>
       </div>
     </footer>
   );

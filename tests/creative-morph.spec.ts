@@ -16,7 +16,7 @@ for (const mobile of [false, true]) {
     for (const [selector, state, label, lead] of [
       ['#case-studies', 'cases', 'Big Thrills', 0.55],
       ['#creative', 'creative', 'Hidden Gems', 0.55],
-      ['#about', 'about', 'WHO DIS?', 0.55],
+      ['#about', 'about', 'Who’s this?', 0.55],
     ] as const) {
       const start = await page.locator(selector).evaluate((el, sectionLead) => el.getBoundingClientRect().top + scrollY
         - new DOMMatrixReadOnly(getComputedStyle(el).transform).m42 - innerHeight * sectionLead, lead);
@@ -52,7 +52,7 @@ for (const mobile of [false, true]) {
       await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(before + 20);
     await expect(heading).not.toHaveAttribute('data-locked', 'true');
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await expect(title).toHaveAttribute('aria-label', 'WHO DIS?');
+    await expect(title).toHaveAttribute('aria-label', 'Who’s this?');
     await expect(page.locator('html')).not.toHaveClass(/lenis-stopped/);
     expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
     expect(errors).toEqual([]);

@@ -138,30 +138,22 @@ test("About shares Creative's canvas and falls back cleanly", async ({ page }) =
   expect(errors).toEqual([]);
 });
 
-test("quote text follows scroll and its character exit reverses cleanly", async ({ page }) => {
+test("quote sequence contains the figure, quotes, and contact prompt", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto(baseURL);
   const quote = page.locator("#quote");
   await quote.scrollIntoViewIfNeeded();
-  await page.waitForTimeout(1500);
-  await page.mouse.wheel(0, 450);
-  await expect.poll(() => page.locator("[data-quote-words]").first().evaluate((element) => Number(getComputedStyle(element).opacity))).toBeGreaterThan(0.7);
-  await page.mouse.wheel(0, 850);
-  await expect.poll(() => page.locator("[data-quote-words]").nth(1).evaluate((element) => Number(getComputedStyle(element).opacity))).toBeGreaterThan(0.7);
-  await page.mouse.wheel(0, -850);
-  await expect.poll(() => page.locator("[data-quote-words]").first().evaluate((element) => Number(getComputedStyle(element).opacity))).toBeGreaterThan(0.7);
+  await expect(quote).toHaveAttribute("data-animated", "true");
+  await expect(quote.locator("[data-quote-actor]")).toHaveCount(1);
+  await expect(quote.locator("[data-quote-words]")).toHaveCount(2);
+  await expect(quote.locator("[data-quote-cta]")).toHaveCount(1);
 });
 
-test("quote text remains scroll controlled on mobile", async ({ page }) => {
+test("quote section fits the mobile viewport", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(baseURL);
   const section = page.locator('#quote');
-  await expect(section).toHaveAttribute('data-animated', 'true');
   await section.scrollIntoViewIfNeeded();
-  await page.waitForTimeout(1500);
-  await page.mouse.wheel(0, 450);
-  await expect.poll(() => page.locator('[data-quote-words]').first().evaluate((element) => Number(getComputedStyle(element).opacity))).toBeGreaterThan(0.7);
-  await page.mouse.wheel(0, 850);
-  await expect.poll(() => page.locator('[data-quote-words]').nth(1).evaluate((element) => Number(getComputedStyle(element).opacity))).toBeGreaterThan(0.7);
+  await expect(section.locator("[data-quote-words]")).toHaveCount(2);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });

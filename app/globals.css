@@ -1,23 +1,30 @@
 @import "tailwindcss";
 
 :root {
+  --ink: #11120d;
+  --paper: #ffffff;
+  --accent: #ddf96b;
+  --content-width: 110rem;
+  --page-gutter: clamp(1rem, 4vw, 3rem);
   color-scheme: light;
-  background: #ffffff;
-  color: #171717;
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
 }
 
 body {
   margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-weight: 400;
 }
 
-.container {
-  width: min(100% - 3rem, 72rem);
+.siteContainer {
+  width: min(calc(100% - (var(--page-gutter) * 2)), var(--content-width));
   margin-inline: auto;
 }
 
-.navbar,
-.footer {
+.navbar {
   padding-block: 1.5rem;
 }
 
@@ -27,7 +34,7 @@ body {
   inset-inline: 0;
   z-index: 50;
   background: transparent;
-  color: #000000;
+  color: var(--ink);
 }
 
 .navbar nav,
@@ -41,6 +48,75 @@ body {
 .navbar nav {
   justify-content: space-between;
 }
+.navbar a {
+  font-family: var(--font-body);
+  font-size: clamp(0.9375rem, 1.1vw, 1rem);
+  font-weight: 500;
+}
+.navbar nav > a:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 850;
+  font-stretch: 76%;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+}
+.nav-mark {
+  display: block;
+  width: 0.75rem;
+  height: 1.1rem;
+  flex: 0 0 auto;
+  background: currentColor;
+  mask: url("/brand/josh-hatchard-mark.svg") center / contain no-repeat;
+  -webkit-mask: url("/brand/josh-hatchard-mark.svg") center / contain no-repeat;
+}
+.nav-links a {
+  font-family: var(--font-label);
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.nav-toggle { display: none; }
+@media (max-width: 700px) {
+  :root { --page-gutter: clamp(10px, 2.5vw, 14px); }
+  .navbar { padding-block: 0.5rem; }
+  .navbar nav { flex-wrap: nowrap; gap: 1rem; }
+  .nav-toggle {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    flex-shrink: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+  .nav-toggle span { width: 25px; height: 2px; background: currentColor; }
+  .navbar[data-menu-open="true"] .nav-toggle span:first-child { transform: translateY(4px) rotate(45deg); }
+  .navbar[data-menu-open="true"] .nav-toggle span:last-child { transform: translateY(-4px) rotate(-45deg); }
+  .navbar .nav-links {
+    display: none;
+    position: absolute;
+    top: 100%;
+    inset-inline: var(--page-gutter);
+    padding: 1rem;
+    background: var(--paper);
+    border: 1px solid var(--ink);
+  }
+  .navbar[data-menu-open="true"] .nav-links { display: grid; gap: 0; }
+  .navbar .nav-links a { color: var(--ink) !important; padding: 0.875rem; }
+  .navbar .nav-links a:hover,
+  .navbar .nav-links a:focus-visible { background: var(--accent); }
+}
 
 a {
   color: inherit;
@@ -51,10 +127,19 @@ a:hover {
   text-decoration: underline;
 }
 
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
 .section {
   min-height: 20rem;
   padding-block: 4rem;
-  border-top: 1px solid #e5e5e5;
+  border-top: 1px solid color-mix(in srgb, var(--ink) 18%, var(--paper));
   display: flex;
   align-items: center;
 }
@@ -66,13 +151,6 @@ a:hover {
 h1,
 h2 {
   margin: 0;
-  font-size: clamp(2rem, 5vw, 3rem);
-  font-weight: 500;
-  line-height: 1.2;
-}
-
-.footer {
-  border-top: 1px solid #e5e5e5;
 }
 
 .lenis-stopped { overflow: hidden; }

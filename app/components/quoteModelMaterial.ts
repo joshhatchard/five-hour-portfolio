@@ -1,11 +1,16 @@
 import { Mesh, ShaderMaterial, SkinnedMesh, Texture, Vector3, type Material, type Object3D } from "three";
 
 // The final zoom can blend this tonal lime treatment into one flat colour.
-const INK_RGB: [number, number, number] = [102 / 255, 132 / 255, 29 / 255]; // #66841d
-const PAPER_RGB: [number, number, number] = [213 / 255, 250 / 255, 72 / 255]; // #d5fa48
+const INK_RGB: [number, number, number] = [17 / 255, 18 / 255, 13 / 255]; // #11120d
+const PAPER_RGB: [number, number, number] = [1, 1, 1]; // #ffffff
 const LIGHT_DIR: [number, number, number] = [-0.55, 0.75, 0.6]; // world-space light, so shading changes as the camera orbits
 const LINE_GAP = 6; // distance between hatch lines in CSS pixels (smaller = denser, darker)
 const OUTLINE = 0.3; // 0 = no outline, higher = thicker scribbled edge around the silhouette
+
+export type StickmanPalette = {
+  ink: [number, number, number];
+  paper: [number, number, number];
+};
 
 const VERTEX = /* glsl */ `
   varying vec3 vNormal;
@@ -126,13 +131,13 @@ export function disposeModel(root: Object3D) {
   });
 }
 
-export function createStickmanMaterial(pixelRatio: number) {
+export function createStickmanMaterial(pixelRatio: number, palette?: StickmanPalette) {
   return new ShaderMaterial({
           vertexShader: VERTEX,
           fragmentShader: FRAGMENT,
           uniforms: {
-            uInk: { value: new Vector3(...INK_RGB) },
-            uPaper: { value: new Vector3(...PAPER_RGB) },
+            uInk: { value: new Vector3(...(palette?.ink ?? INK_RGB)) },
+            uPaper: { value: new Vector3(...(palette?.paper ?? PAPER_RGB)) },
             uLight: { value: new Vector3(...LIGHT_DIR).normalize() },
             uPx: { value: pixelRatio },
             uGap: { value: LINE_GAP },
