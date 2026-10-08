@@ -247,6 +247,13 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
           };
 
           const update = () => {
+            if (scrollProgress.value > 0 && hero.dataset.heroIntro === "true" && hero.dataset.heroEntranceComplete !== "true" && hero.dataset.heroIntroSkipped !== "true") {
+              hero.dataset.heroIntroSkipped = "true";
+              hero.dataset.heroEntered = "true";
+              document.querySelector('[data-warp-canvas]')?.setAttribute('data-hero-intro-skipped', 'true');
+              // Measure final resting positions, never the entrance transforms.
+              measure();
+            }
             if (animated) {
               // The splash completes inside the final stretch of the dive;
               // there is no held landing interval before the next section.

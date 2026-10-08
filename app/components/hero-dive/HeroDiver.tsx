@@ -288,11 +288,26 @@ export default function HeroDiver() {
       // Apply the supplied world-space poser in a neutral parent frame first.
       resetNeutral();
       const motion = flight(hero, hero.figureHeight * hipRatio, launchHip);
-      poserObj.apply(motion.pose);
+      const pointerX = Number(getComputedStyle(hero.element).getPropertyValue("--hero-pointer-x")) || 0;
+      const pointerY = Number(getComputedStyle(hero.element).getPropertyValue("--hero-pointer-y")) || 0;
+      // Before the leap, let the figure acknowledge the cursor with a small
+      // balancing turn and arm response. The authored dive pose takes over at
+      // launch, so this cannot disturb the airborne choreography.
+      const idle = 1 - smooth(0.1, diveConfig.launch, p);
+      const pose = idle > 0
+        ? {
+            ...motion.pose,
+            armSwing: motion.pose.armSwing + pointerX * 18 * idle,
+            armStride: motion.pose.armStride + pointerX * 14 * idle,
+            armRaise: motion.pose.armRaise - pointerY * 10 * idle,
+            head: motion.pose.head + pointerY * 4 * idle,
+          }
+        : motion.pose;
+      poserObj.apply(pose);
       tumble.scale.setScalar(scale);
       // Mirror the authored flips to face left into the landing.
       const twist = motion.pose.yaw - sampleDive(0).yaw;
-      yaw.rotation.y = (-motion.pose.yaw * Math.PI) / 180;
+      yaw.rotation.y = (-motion.pose.yaw * Math.PI) / 180 + pointerX * 0.18 * idle;
       tumble.rotation.z = (-motion.pose.rotZ * Math.PI) / 180;
       if (p < diveConfig.launch) {
         scene.updateMatrixWorld(true);
@@ -319,8 +334,6 @@ export default function HeroDiver() {
       // Match the hero scene's pointer parallax while the figure is still
       // standing on the cliff, then ease it out before the dive takes over.
       const pointerDepth = 1 - smooth(0.06, 0.24, p);
-      const pointerX = Number(getComputedStyle(hero.element).getPropertyValue("--hero-pointer-x")) || 0;
-      const pointerY = Number(getComputedStyle(hero.element).getPropertyValue("--hero-pointer-y")) || 0;
       tumble.position.x += pointerX * 20 * pointerDepth;
       tumble.position.y -= pointerY * 15 * pointerDepth;
       if (skin) {
@@ -401,6 +414,8 @@ export default function HeroDiver() {
       gl.setScissorTest(false);
       // Hide the SVG only after this controller has actually drawn the model.
       hero.element.dataset.modelReady = "true";
+      const canvasHost = document.querySelector<HTMLElement>("[data-warp-canvas]");
+      if (canvasHost) canvasHost.dataset.heroFigureReady = "true";
       hero.element.dataset.modelFacing =
         Math.sin(yaw.rotation.y) >= 0 ? "right" : "left";
     };
@@ -409,6 +424,7 @@ export default function HeroDiver() {
       active = false;
       state.backgroundRender.delete(draw);
       document.querySelector("#hero")?.removeAttribute("data-model-ready");
+      document.querySelector<HTMLElement>("[data-warp-canvas]")?.removeAttribute("data-hero-figure-ready");
       if (root) disposeModel(root);
       scene.clear();
     };

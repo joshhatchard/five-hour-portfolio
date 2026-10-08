@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import { useHeroDive } from "./hero-dive/useHeroDive";
 import HeroDotField from "./hero-dive/HeroDotField";
 import HeroParticles from "./hero-dive/HeroParticles";
@@ -9,6 +9,33 @@ import styles from "./Hero.module.css";
 export default function Hero() {
   const heroRef = useRef<HTMLElement>(null);
   useHeroDive(heroRef);
+  useEffect(() => {
+    const hero = heroRef.current;
+    if (!hero) return;
+    let frame = 0;
+    const checkEntrance = () => {
+      const targets = [hero, document.querySelector('.navbar'), document.querySelector('[data-warp-canvas]')];
+      const running = targets.some(target => target?.getAnimations({ subtree: true }).some(animation => animation.playState === 'running' || animation.pending));
+      if (running) {
+        frame = requestAnimationFrame(checkEntrance);
+        return;
+      }
+      hero.dataset.heroEntered = "true";
+      hero.dataset.heroEntranceComplete = "true";
+      window.dispatchEvent(new Event("resize"));
+      window.dispatchEvent(new Event("hero-entrance-complete"));
+    };
+    const beginEntrance = () => {
+      hero.dataset.heroIntro = "true";
+      frame = requestAnimationFrame(checkEntrance);
+    };
+    if (document.documentElement.dataset.portfolioReady === "true") beginEntrance();
+    window.addEventListener("portfolio-ready", beginEntrance, { once: true });
+    return () => {
+      window.removeEventListener("portfolio-ready", beginEntrance);
+      cancelAnimationFrame(frame);
+    };
+  }, []);
   useEffect(() => {
     const hero = heroRef.current;
     const stage = hero?.querySelector<HTMLElement>("[data-hero-stage]");
@@ -57,14 +84,18 @@ export default function Hero() {
       <div className={styles.layout}>
         <div className={styles.copy}>
           <h1 id="hero-heading" className={styles.title}>
-            <span data-hero-copy>IT&apos;S A <strong>NEW ERA</strong> OF</span>
-            <span data-hero-copy>
+            <span className={styles.line} data-hero-copy style={{ "--i": 0 } as CSSProperties}><span>IT&apos;S A <strong>NEW ERA</strong> OF</span></span>
+            <span className={styles.line} data-hero-copy style={{ "--i": 1 } as CSSProperties}><span>
               <strong>DESIGN</strong> WITH <strong>CODE</strong>
-            </span>
-            <span><span data-hero-copy>&amp; I&apos;M </span><strong className={styles.highlight} data-hero-send>FULL SEND!</strong></span>
+            </span></span>
+            <span className={styles.line} style={{ "--i": 2 } as CSSProperties}><span onAnimationEnd={(event) => {
+              if (event.target !== event.currentTarget) return;
+              heroRef.current?.setAttribute("data-hero-entered", "true");
+              window.dispatchEvent(new Event("resize"));
+            }}><span data-hero-copy>&amp; I&apos;M </span><strong className={`${styles.highlight} ${styles.go}`} data-hero-send>FULL SEND!</strong></span></span>
           </h1>
           <p className={styles.description} data-hero-copy>
-            Designer &amp; Developer (aka design technologist) turning ideas into fully functional digital products.
+            <span>Designer &amp; Developer (aka design technologist) turning ideas into fully functional digital products.</span>
           </p>
         </div>
         <div className={styles.illustration} aria-hidden="true">
@@ -75,31 +106,37 @@ export default function Hero() {
               </clipPath>
             </defs>
             <g data-parallax="0.5" data-fly-away opacity="0.5" clipPath="url(#hero-left-birds)">
-              <image
-                href="/hero/birds.png"
-                x="-20"
-                y="20"
-                width="480"
-                height="240"
-                preserveAspectRatio="xMidYMid meet"
-              />
+              <g className={styles.birds}>
+                <image
+                  href="/hero/birds.png"
+                  x="-20"
+                  y="20"
+                  width="480"
+                  height="240"
+                  preserveAspectRatio="xMidYMid meet"
+                />
+              </g>
             </g>
             <g data-parallax="1">
-              <image
-                href="/hero/boulder-crosshatch.png"
-                x="82"
-                y="360"
-                width="520"
-                height="365"
-                preserveAspectRatio="xMidYMin meet"
-              />
+              <g className={styles.boulder}>
+                <image
+                  href="/hero/boulder-crosshatch.png"
+                  x="82"
+                  y="360"
+                  width="520"
+                  height="365"
+                  preserveAspectRatio="xMidYMin meet"
+                />
+              </g>
             </g>
             <g className={styles.figureCaption} data-hero-copy>
-              <text x="368" y="92">YEP, THAT&apos;S JOSH</text>
-              <path d="M414 119C399 127 382 138 365 153" />
-              <path d="M365 153L377 149M365 153L371 141" />
+              <g className={styles.figureCaptionInner}>
+                <text x="368" y="92">YEP, THAT&apos;S JOSH</text>
+                <path d="M414 119C399 127 382 138 365 153" />
+                <path d="M365 153L377 149M365 153L371 141" />
+              </g>
             </g>
-            <g className={styles.fallbackFigure}>
+            <g className={`${styles.fallbackFigure} ${styles.figureIntro}`}>
             <g fill="none" stroke="currentColor" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round">
               <path d="M322 215L350 300M332 241L385 229M332 241L382 257M350 300L327 334L340 373M350 300L354 337L378 373" />
             </g>
@@ -109,7 +146,7 @@ export default function Hero() {
           </svg>
         </div>
       </div>
-      <p className={styles.scrollHint} data-hero-copy>Scroll to see work <span aria-hidden="true">↓</span></p>
+      <p className={styles.scrollHint} data-hero-copy><span className={styles.scrollHintInner}>Scroll to see work <span aria-hidden="true">↓</span></span></p>
       </div>
     </section>
   );

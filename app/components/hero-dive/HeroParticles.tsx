@@ -79,19 +79,28 @@ export default function HeroParticles() {
       depthTest: false,
       uniforms: { uTime: { value: 0 } },
     });
-    const particles = new Mesh(gl, { mode: gl.POINTS, geometry, program });
+    // The shader expands positions beyond the geometry's CPU-side bounds.
+    const particles = new Mesh(gl, { mode: gl.POINTS, geometry, program, frustumCulled: false });
     const mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
+    let renderWidth = 0;
+    let renderHeight = 0;
 
     const resize = () => {
       const { width, height } = container.getBoundingClientRect();
+      if (width === renderWidth && height === renderHeight) return;
+      renderWidth = width;
+      renderHeight = height;
       renderer.setSize(Math.max(1, width), Math.max(1, height));
       camera.perspective({ aspect: Math.max(1, width) / Math.max(1, height) });
     };
     const pointer = (event: PointerEvent) => {
-      const bounds = container.getBoundingClientRect();
+      // Use the stable viewport, not the initially tiny expanding label:
+      // dividing by that label produced huge offsets that persisted until
+      // the next pointer event, pushing the entire field off screen.
+      const bounds = container.closest('[data-hero-stage]')!.getBoundingClientRect();
       if (!bounds.width || !bounds.height) return;
-      mouse.targetX = ((event.clientX - bounds.left) / bounds.width - 0.5) * 2;
-      mouse.targetY = -((event.clientY - bounds.top) / bounds.height - 0.5) * 2;
+      mouse.targetX = Math.max(-1, Math.min(1, ((event.clientX - bounds.left) / bounds.width - 0.5) * 2));
+      mouse.targetY = Math.max(-1, Math.min(1, -((event.clientY - bounds.top) / bounds.height - 0.5) * 2));
     };
     const observer = new ResizeObserver(resize);
     observer.observe(container);
@@ -101,6 +110,10 @@ export default function HeroParticles() {
     let frame = 0;
     const render = (time: number) => {
       frame = requestAnimationFrame(render);
+      // The fill begins as a small label and expands during the dive. Check
+      // its live size here as well as observing it, so the first visible frame
+      // is always rendered at the expanded canvas size.
+      resize();
       const progress = Number(container.closest<HTMLElement>("#hero")?.dataset.diveProgress ?? 0);
       mouse.x += (mouse.targetX - mouse.x) * 0.05;
       mouse.y += (mouse.targetY - mouse.y) * 0.05;

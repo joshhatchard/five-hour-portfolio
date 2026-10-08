@@ -39,7 +39,7 @@ export default function WarpCanvas() {
   if (lost) return null;
   return (
     <CanvasBoundary>
-      <div className="pointer-events-none fixed inset-0 z-10" aria-hidden="true" onContextMenu={(event) => event.preventDefault()}>
+      <div className="pointer-events-none fixed inset-0 z-10" data-warp-canvas aria-hidden="true" onContextMenu={(event) => event.preventDefault()}>
         <Canvas
           style={{ pointerEvents: "none" }}
           orthographic

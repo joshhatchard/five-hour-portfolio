@@ -33,7 +33,19 @@ export default function LoadingScreen({ runtime }: Props) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (phase !== "loading") return;
+    if (phase !== "leaving") return;
+    const timer = window.setTimeout(() => setPhase("done"), EXIT_DURATION_MS);
+    return () => clearTimeout(timer);
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase !== "done") return;
+    document.documentElement.dataset.portfolioReady = "true";
+    window.dispatchEvent(new Event("portfolio-ready"));
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase === "done") return;
     const resetToHero = () => {
       const lenis = runtime.current.lenis;
       if (lenis) {
@@ -42,6 +54,16 @@ export default function LoadingScreen({ runtime }: Props) {
       window.scrollTo(0, 0);
     };
     const previousRestoration = history.scrollRestoration;
+    const preventScroll = (event: Event) => {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    };
+    const preventScrollKey = (event: KeyboardEvent) => {
+      if (["ArrowDown", "ArrowUp", "PageDown", "PageUp", "Home", "End", " "].includes(event.key)) preventScroll(event);
+    };
+    window.addEventListener("wheel", preventScroll, { passive: false, capture: true });
+    window.addEventListener("touchmove", preventScroll, { passive: false, capture: true });
+    window.addEventListener("keydown", preventScrollKey, true);
     history.scrollRestoration = "manual";
     resetToHero();
     const frame = requestAnimationFrame(resetToHero);
@@ -51,6 +73,9 @@ export default function LoadingScreen({ runtime }: Props) {
       cancelAnimationFrame(frame);
       clearInterval(interval);
       window.removeEventListener("scroll", resetToHero);
+      window.removeEventListener("wheel", preventScroll, true);
+      window.removeEventListener("touchmove", preventScroll, true);
+      window.removeEventListener("keydown", preventScrollKey, true);
       history.scrollRestoration = previousRestoration;
     };
   }, [phase, runtime]);
@@ -65,14 +90,11 @@ export default function LoadingScreen({ runtime }: Props) {
     try {
       renderer = new WebGLRenderer({ canvas, alpha: true, antialias: true });
     } catch {
-      let doneTimer = 0;
       const leaveTimer = window.setTimeout(() => {
         setPhase("leaving");
-        doneTimer = window.setTimeout(() => setPhase("done"), EXIT_DURATION_MS);
       }, 0);
       return () => {
         clearTimeout(leaveTimer);
-        clearTimeout(doneTimer);
       };
     }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
@@ -100,7 +122,6 @@ export default function LoadingScreen({ runtime }: Props) {
       window.setTimeout(() => {
         if (!active) return;
         setPhase("leaving");
-        window.setTimeout(() => active && setPhase("done"), EXIT_DURATION_MS);
       }, delay);
     };
     const checkReady = () => {
