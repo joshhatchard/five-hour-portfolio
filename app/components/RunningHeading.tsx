@@ -22,6 +22,7 @@ const TRANSITION_VIEWPORTS = 0.85;
 const NEXT_SECTION_LEAD_VIEWPORTS = 0.55;
 const COLOUR_TRANSITION_VIEWPORTS = 0.24;
 const SECTION_COLOURS = ["#11120d", "#ffffff", "#11120d"];
+const SECTION_GRID_COLOURS = ["rgba(255, 255, 255, 0.075)", "rgba(17, 18, 13, 0.06)", "rgba(255, 255, 255, 0.075)"];
 export default function RunningHeading({ steps, children }: Props) {
   const { runtime } = useScrollRuntime();
   const ref = useRef<HTMLDivElement>(null);
@@ -57,6 +58,11 @@ export default function RunningHeading({ steps, children }: Props) {
       let resumeLenis = false;
       let nudge: gsap.core.Tween | undefined;
       let nudging = false;
+      const gridCanvas = surface.querySelector<HTMLCanvasElement>("[data-work-grid]");
+      let gridFrame = 0;
+      let gridWidth = 0;
+      let gridHeight = 0;
+      const gridPointer = { x: -1000, y: -1000 };
       const cancelNudge = () => {
         nudge?.kill();
         if (nudging) runtime.current.lenis?.scrollTo(window.scrollY, { immediate: true });
@@ -96,6 +102,65 @@ export default function RunningHeading({ steps, children }: Props) {
         if (runtime.current.lenis) runtime.current.lenis.scrollTo(y, { immediate: true, force: true });
         else window.scrollTo({ top: y, behavior: "instant" });
       };
+      const resetGridHover = () => {
+        gridPointer.x = -1000;
+        gridPointer.y = -1000;
+      };
+      const trackGridHover = (event: PointerEvent) => {
+        if (reduced) return;
+        const bounds = surface.getBoundingClientRect();
+        gridPointer.x = event.clientX - bounds.left;
+        gridPointer.y = event.clientY - bounds.top;
+      };
+      const drawGrid = () => {
+        if (!gridCanvas) return;
+        const bounds = surface.getBoundingClientRect();
+        const width = Math.round(bounds.width);
+        const height = Math.round(bounds.height);
+        const density = Math.min(window.devicePixelRatio || 1, 2);
+        if (width !== gridWidth || height !== gridHeight) {
+          gridWidth = width;
+          gridHeight = height;
+          gridCanvas.width = Math.max(1, width * density);
+          gridCanvas.height = Math.max(1, height * density);
+          gridCanvas.style.width = `${width}px`;
+          gridCanvas.style.height = `${height}px`;
+        }
+        const context = gridCanvas.getContext("2d");
+        if (!context) return;
+        context.setTransform(density, 0, 0, density, 0, 0);
+        context.clearRect(0, 0, width, height);
+        const computed = getComputedStyle(surface);
+        const colour = computed.getPropertyValue("--grid-colour").trim() || "rgba(255, 255, 255, 0.075)";
+        const accent = computed.getPropertyValue("--accent").trim() || "#ddf96b";
+        const spacing = gsap.utils.clamp(40, 100, width * 0.05);
+        const sample = Math.max(8, spacing / 4);
+        if (gridPointer.x >= 0 && gridPointer.y >= 0) {
+          const cellX = Math.floor(gridPointer.x / spacing) * spacing;
+          const cellY = Math.floor(gridPointer.y / spacing) * spacing;
+          context.fillStyle = accent;
+          context.fillRect(cellX, cellY, spacing, spacing);
+        }
+        context.strokeStyle = colour;
+        context.lineWidth = 1;
+        for (let y = 0; y <= height + spacing; y += spacing) {
+          context.beginPath();
+          for (let x = -spacing; x <= width + spacing; x += sample) {
+            if (x === -spacing) context.moveTo(x, y);
+            else context.lineTo(x, y);
+          }
+          context.stroke();
+        }
+        for (let x = 0; x <= width + spacing; x += spacing) {
+          context.beginPath();
+          for (let y = -spacing; y <= height + spacing; y += sample) {
+            if (y === -spacing) context.moveTo(x, y);
+            else context.lineTo(x, y);
+          }
+          context.stroke();
+        }
+        gridFrame = requestAnimationFrame(drawGrid);
+      };
       const setPhrase = (next: number) => {
         const step = steps[next];
         const phrase = step.words.join("");
@@ -118,8 +183,11 @@ export default function RunningHeading({ steps, children }: Props) {
         timeline = gsap.timeline({ paused: true });
         const from = SECTION_COLOURS[Math.max(0, index - 1)];
         const to = SECTION_COLOURS[index];
-        colourTween = gsap.fromTo(surface, { backgroundColor: from }, {
+        const gridFrom = SECTION_GRID_COLOURS[Math.max(0, index - 1)];
+        const gridTo = SECTION_GRID_COLOURS[index];
+        colourTween = gsap.fromTo(surface, { backgroundColor: from, "--grid-colour": gridFrom }, {
           backgroundColor: to,
+          "--grid-colour": gridTo,
           duration: 1,
           ease: "none",
           paused: true,
@@ -306,6 +374,9 @@ export default function RunningHeading({ steps, children }: Props) {
       window.addEventListener("touchstart", cancelNudge, { capture: true, passive: true });
       window.addEventListener("keydown", cancelNudge, true);
       window.addEventListener("scroll", render, { passive: true });
+      window.addEventListener("pointermove", trackGridHover, { passive: true });
+      window.addEventListener("pointerleave", resetGridHover);
+      gridFrame = requestAnimationFrame(drawGrid);
       return () => {
         alive = false;
         cancelNudge();
@@ -313,6 +384,9 @@ export default function RunningHeading({ steps, children }: Props) {
         window.removeEventListener("touchstart", cancelNudge, true);
         window.removeEventListener("keydown", cancelNudge, true);
         window.removeEventListener("scroll", render);
+        window.removeEventListener("pointermove", trackGridHover);
+        window.removeEventListener("pointerleave", resetGridHover);
+        cancelAnimationFrame(gridFrame);
         release();
         trigger.kill(); timeline?.kill(); introExit?.kill(); colourTween?.kill();
         if (surface.isConnected && heading.isConnected) {
@@ -324,7 +398,7 @@ export default function RunningHeading({ steps, children }: Props) {
   }, { scope: ref, dependencies: [steps], revertOnUpdate: true });
 
   return <div ref={ref} className={styles.work}>
-    <div className={styles.surface} data-work-surface aria-hidden="true" />
+    <div className={styles.surface} data-work-surface aria-hidden="true"><canvas className={styles.gridCanvas} data-work-grid /></div>
     <div className={styles.heading} data-work-heading>
       <div className={styles.copy}>
         <h2 aria-label={first.label} data-phase={first.id}>

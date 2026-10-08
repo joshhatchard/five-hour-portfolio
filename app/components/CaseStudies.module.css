@@ -4,19 +4,6 @@
   color: var(--paper);
 }
 .content { overflow-x: clip; }
-.section::before {
-  content: "";
-  position: absolute;
-  z-index: 1;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.5;
-  background-image:
-    linear-gradient(color-mix(in srgb, var(--paper) 12%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in srgb, var(--paper) 12%, transparent) 1px, transparent 1px);
-  background-size: clamp(2.5rem, 5vw, 6.25rem) clamp(2.5rem, 5vw, 6.25rem);
-}
-
 .gallery {
   --guide: color-mix(in srgb, var(--paper) 16%, transparent);
   position: relative;

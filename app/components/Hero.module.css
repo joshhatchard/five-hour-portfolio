@@ -17,6 +17,7 @@
   background: var(--paper);
   color: var(--ink);
   overflow: clip;
+  perspective: 1200px;
 }
 
 .layout {
@@ -28,9 +29,15 @@
   margin-inline: auto;
   flex: 1;
   position: relative;
+  z-index: 1;
 }
 
-.illustration { min-width: 0; }
+.illustration {
+  min-width: 0;
+  transform: translate3d(var(--hero-scene-x, 0), var(--hero-scene-y, 0), 0) rotateX(var(--hero-scene-rotate-x, 0deg)) rotateY(var(--hero-scene-rotate-y, 0deg));
+  transform-style: preserve-3d;
+  will-change: transform;
+}
 .scene { display: block; width: 100%; height: auto; overflow: visible; }
 .figureCaption {
   fill: var(--ink);
@@ -44,7 +51,12 @@
   letter-spacing: 0.07em;
 }
 .figureCaption text { stroke: none; }
-.copy { min-width: 0; padding-block: 2rem; }
+.copy {
+  min-width: 0;
+  padding-block: 2rem;
+  transform: translate3d(var(--hero-copy-x, 0), var(--hero-copy-y, 0), 0);
+  will-change: transform;
+}
 
 .title {
   position: relative;
@@ -161,6 +173,11 @@
   height: 100dvh;
   min-height: 100dvh;
 }
-.fill { position: absolute; pointer-events: none; background: var(--hero-lime); opacity: 0; }
+.fill { position: absolute; isolation: isolate; overflow: hidden; pointer-events: none; background: var(--hero-lime); opacity: 0; }
 .highlight { position: relative; transform-origin: left top; z-index: 1; }
 .hero[data-model-ready="true"] .fallbackFigure { visibility: hidden; }
+
+@media (prefers-reduced-motion: reduce), (pointer: coarse) {
+  .copy,
+  .illustration { transform: none; }
+}

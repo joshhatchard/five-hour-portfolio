@@ -1,16 +1,59 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useHeroDive } from "./hero-dive/useHeroDive";
+import HeroDotField from "./hero-dive/HeroDotField";
+import HeroParticles from "./hero-dive/HeroParticles";
 import styles from "./Hero.module.css";
 
 export default function Hero() {
   const heroRef = useRef<HTMLElement>(null);
   useHeroDive(heroRef);
+  useEffect(() => {
+    const hero = heroRef.current;
+    const stage = hero?.querySelector<HTMLElement>("[data-hero-stage]");
+    if (!hero || !stage || !window.matchMedia("(pointer: fine)").matches) return;
+
+    let frame = 0;
+    let targetX = 0;
+    let targetY = 0;
+    let currentX = 0;
+    let currentY = 0;
+    const render = () => {
+      currentX += (targetX - currentX) * 0.1;
+      currentY += (targetY - currentY) * 0.1;
+      stage.style.setProperty("--hero-copy-x", `${currentX * 9}px`);
+      stage.style.setProperty("--hero-copy-y", `${currentY * 7}px`);
+      stage.style.setProperty("--hero-scene-x", `${currentX * 20}px`);
+      stage.style.setProperty("--hero-scene-y", `${currentY * 15}px`);
+      stage.style.setProperty("--hero-scene-rotate-x", `${currentY * -1.2}deg`);
+      stage.style.setProperty("--hero-scene-rotate-y", `${currentX * 1.5}deg`);
+      hero.style.setProperty("--hero-pointer-x", currentX.toFixed(4));
+      hero.style.setProperty("--hero-pointer-y", currentY.toFixed(4));
+      frame = requestAnimationFrame(render);
+    };
+    const move = (event: PointerEvent) => {
+      const bounds = hero.getBoundingClientRect();
+      targetX = Math.max(-1, Math.min(1, (event.clientX - bounds.left) / bounds.width * 2 - 1));
+      targetY = Math.max(-1, Math.min(1, (event.clientY - bounds.top) / bounds.height * 2 - 1));
+    };
+    const reset = () => { targetX = 0; targetY = 0; };
+    hero.addEventListener("pointermove", move, { passive: true });
+    hero.addEventListener("pointerleave", reset);
+    frame = requestAnimationFrame(render);
+    return () => {
+      cancelAnimationFrame(frame);
+      hero.removeEventListener("pointermove", move);
+      hero.removeEventListener("pointerleave", reset);
+      hero.style.removeProperty("--hero-pointer-x");
+      hero.style.removeProperty("--hero-pointer-y");
+    };
+  }, []);
   return (
     <section ref={heroRef} id="hero" className={styles.hero} aria-labelledby="hero-heading">
       <div className={styles.stage} data-hero-stage>
-      <div className={styles.fill} data-hero-fill aria-hidden="true" />
+      <HeroDotField />
+      <div className={styles.fill} data-hero-fill aria-hidden="true"><HeroParticles /></div>
       <div className={styles.layout}>
         <div className={styles.copy}>
           <h1 id="hero-heading" className={styles.title}>

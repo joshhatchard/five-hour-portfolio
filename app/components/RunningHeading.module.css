@@ -13,6 +13,12 @@
   overflow: hidden;
   background: var(--ink);
   pointer-events: none;
+  --grid-colour: rgba(255, 255, 255, 0.075);
+}
+.gridCanvas {
+  position: absolute;
+  inset: 0;
+  display: block;
 }
 .heading {
   position: sticky;

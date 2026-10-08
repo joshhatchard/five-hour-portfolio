@@ -316,6 +316,13 @@ export default function HeroDiver() {
         0,
       );
       if (p === 0) tumble.position.y -= hero.stageTop;
+      // Match the hero scene's pointer parallax while the figure is still
+      // standing on the cliff, then ease it out before the dive takes over.
+      const pointerDepth = 1 - smooth(0.06, 0.24, p);
+      const pointerX = Number(getComputedStyle(hero.element).getPropertyValue("--hero-pointer-x")) || 0;
+      const pointerY = Number(getComputedStyle(hero.element).getPropertyValue("--hero-pointer-y")) || 0;
+      tumble.position.x += pointerX * 20 * pointerDepth;
+      tumble.position.y -= pointerY * 15 * pointerDepth;
       if (skin) {
         parseRgb(hero.ink, skin.uniforms.uInk.value as Vector3);
         skin.uniforms.uPx.value = gl.getPixelRatio();

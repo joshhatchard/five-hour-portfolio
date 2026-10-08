@@ -28,6 +28,8 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
       const svg = hero.querySelector<SVGSVGElement>("[data-hero-world]")!;
       const highlight = hero.querySelector<HTMLElement>("[data-hero-send]")!;
       const fill = hero.querySelector<HTMLElement>("[data-hero-fill]")!;
+      const fullSendParticles = hero.querySelector<HTMLElement>("[data-hero-particles]")!;
+      const dotField = hero.querySelector<HTMLElement>("[data-hero-dot-field]")!;
       const layers = Array.from(
         svg.querySelectorAll<SVGElement>("[data-parallax]"),
       );
@@ -209,6 +211,10 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
             fill.style.opacity = p > 0.04 ? "1" : "0";
             fill.style.transformOrigin = "left top";
             fill.style.transform = "none";
+            // Keep the field out of the small label expansion, then reveal it
+            // once the lime has become the full stage background.
+            fullSendParticles.style.opacity = String(smooth(0.2, 0.26, p));
+            dotField.style.opacity = String(1 - smooth(0.02, 0.1, p));
 
             highlight.style.backgroundColor = p > 0.04 ? "transparent" : "";
             // When the next section reaches the waterline, release the label
@@ -321,6 +327,8 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
             highlight.style.removeProperty("background-color");
             highlight.style.removeProperty("opacity");
             fill.style.opacity = "0";
+            fullSendParticles.style.removeProperty("opacity");
+            dotField.style.removeProperty("opacity");
             splash.style.opacity = "0";
           };
         },

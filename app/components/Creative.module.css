@@ -5,7 +5,6 @@
   padding-inline: var(--page-gutter);
   background: transparent;
 }
-
 .gallery {
   position: relative;
   z-index: 2;

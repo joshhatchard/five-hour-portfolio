@@ -5,7 +5,6 @@
   padding-inline: var(--page-gutter);
   background: transparent;
 }
-
 .grid {
   position: relative;
   z-index: 2;
@@ -99,6 +98,8 @@
 .background span { color: var(--paper); }
 
 .quoteMount {
+  position: relative;
+  z-index: 2;
   width: 100vw;
   margin-top: 0;
   margin-left: 50%;
