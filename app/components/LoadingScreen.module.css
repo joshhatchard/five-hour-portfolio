@@ -5,7 +5,7 @@
   display: grid;
   place-items: center;
   overflow: hidden;
-  background: var(--accent);
+  background: var(--primary);
   color: var(--ink);
   transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
 }

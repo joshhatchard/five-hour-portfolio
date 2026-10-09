@@ -46,7 +46,9 @@ export default function Hero() {
     let targetY = 0;
     let currentX = 0;
     let currentY = 0;
+    const schedule = () => { if (!frame) frame = requestAnimationFrame(render); };
     const render = () => {
+      frame = 0;
       currentX += (targetX - currentX) * 0.1;
       currentY += (targetY - currentY) * 0.1;
       stage.style.setProperty("--hero-copy-x", `${currentX * 9}px`);
@@ -57,14 +59,15 @@ export default function Hero() {
       stage.style.setProperty("--hero-scene-rotate-y", `${currentX * 1.5}deg`);
       hero.style.setProperty("--hero-pointer-x", currentX.toFixed(4));
       hero.style.setProperty("--hero-pointer-y", currentY.toFixed(4));
-      frame = requestAnimationFrame(render);
+      if (Math.abs(targetX - currentX) + Math.abs(targetY - currentY) > 0.0001) schedule();
     };
     const move = (event: PointerEvent) => {
       const bounds = hero.getBoundingClientRect();
       targetX = Math.max(-1, Math.min(1, (event.clientX - bounds.left) / bounds.width * 2 - 1));
       targetY = Math.max(-1, Math.min(1, (event.clientY - bounds.top) / bounds.height * 2 - 1));
+      schedule();
     };
-    const reset = () => { targetX = 0; targetY = 0; };
+    const reset = () => { targetX = 0; targetY = 0; schedule(); };
     hero.addEventListener("pointermove", move, { passive: true });
     hero.addEventListener("pointerleave", reset);
     frame = requestAnimationFrame(render);

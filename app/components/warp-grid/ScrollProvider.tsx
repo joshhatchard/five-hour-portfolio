@@ -93,11 +93,19 @@ export default function ScrollProvider({ children }: { children: ReactNode }) {
     runtime.current.velocity = 0;
     let previous = lenis?.scroll ?? window.scrollY;
     let active = true;
+    let refreshFrame = 0;
     const refresh = () => {
       if (!active) return;
       lenis?.resize();
       runtime.current.refresh.forEach((callback) => callback());
       ScrollTrigger.refresh();
+    };
+    const scheduleRefresh = () => {
+      if (!active || refreshFrame) return;
+      refreshFrame = requestAnimationFrame(() => {
+        refreshFrame = 0;
+        refresh();
+      });
     };
     const tick = (time: number, deltaMs: number) => {
       lenis?.raf(time * 1000);
@@ -117,16 +125,17 @@ export default function ScrollProvider({ children }: { children: ReactNode }) {
     lenis?.on("scroll", ScrollTrigger.update);
     gsap.ticker.lagSmoothing(0);
     gsap.ticker.add(tick);
-    window.addEventListener("resize", refresh);
-    const observer = new ResizeObserver(refresh);
+    window.addEventListener("resize", scheduleRefresh);
+    const observer = new ResizeObserver(scheduleRefresh);
     observer.observe(document.body);
-    document.fonts.ready.then(refresh);
+    document.fonts.ready.then(scheduleRefresh);
     refresh();
     return () => {
       active = false;
+      cancelAnimationFrame(refreshFrame);
       document.removeEventListener("click", navigateToWork, true);
       observer.disconnect();
-      window.removeEventListener("resize", refresh);
+      window.removeEventListener("resize", scheduleRefresh);
       gsap.ticker.remove(tick);
       lenis?.off("scroll", ScrollTrigger.update);
       lenis?.destroy();

@@ -88,7 +88,7 @@
   right: 0;
   top: 0;
   padding: 0.45rem 0.7rem;
-  background: var(--accent);
+  background: var(--primary);
   color: var(--ink);
   font-family: var(--font-label);
   font-size: 0.75rem;

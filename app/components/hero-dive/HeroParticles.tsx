@@ -82,6 +82,10 @@ export default function HeroParticles() {
     // The shader expands positions beyond the geometry's CPU-side bounds.
     const particles = new Mesh(gl, { mode: gl.POINTS, geometry, program, frustumCulled: false });
     const mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
+    const hero = container.closest<HTMLElement>("#hero");
+    let visible = false;
+    const visibility = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; });
+    visibility.observe(container);
     let renderWidth = 0;
     let renderHeight = 0;
 
@@ -94,6 +98,7 @@ export default function HeroParticles() {
       camera.perspective({ aspect: Math.max(1, width) / Math.max(1, height) });
     };
     const pointer = (event: PointerEvent) => {
+      if (!visible) return;
       // Use the stable viewport, not the initially tiny expanding label:
       // dividing by that label produced huge offsets that persisted until
       // the next pointer event, pushing the entire field off screen.
@@ -110,11 +115,12 @@ export default function HeroParticles() {
     let frame = 0;
     const render = (time: number) => {
       frame = requestAnimationFrame(render);
+      const progress = Number(hero?.dataset.diveProgress ?? 0);
+      if (!visible || document.hidden || progress <= 0.2) return;
       // The fill begins as a small label and expands during the dive. Check
       // its live size here as well as observing it, so the first visible frame
       // is always rendered at the expanded canvas size.
       resize();
-      const progress = Number(container.closest<HTMLElement>("#hero")?.dataset.diveProgress ?? 0);
       mouse.x += (mouse.targetX - mouse.x) * 0.05;
       mouse.y += (mouse.targetY - mouse.y) * 0.05;
       const orbitProgress = smooth(0.2, diveConfig.cameraNeutral, progress);
@@ -135,6 +141,7 @@ export default function HeroParticles() {
     return () => {
       cancelAnimationFrame(frame);
       observer.disconnect();
+      visibility.disconnect();
       window.removeEventListener("pointermove", pointer);
       geometry.remove();
       program.remove();

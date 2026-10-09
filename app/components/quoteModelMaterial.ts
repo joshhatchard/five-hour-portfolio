@@ -105,8 +105,9 @@ const FRAGMENT = /* glsl */ `
     // Flatten only at the peak of the Quote zoom so the matching full-screen
     // lime layer can take over without an edge.
     vec3 zoomColour = mix(shaded, uPaper, uFlat);
-    // The CTA figure is white paper with the original ink sketching.
-    vec3 finalSketch = coverage > 0.5 ? vec3(17.0 / 255.0, 18.0 / 255.0, 14.0 / 255.0) : vec3(1.0);
+    // The CTA figure uses the site primary on its paper areas, with the sketch
+    // marks left in ink so it stays readable against the white CTA field.
+    vec3 finalSketch = coverage > 0.5 ? vec3(17.0 / 255.0, 18.0 / 255.0, 14.0 / 255.0) : vec3(196.0 / 255.0, 241.0 / 255.0, 58.0 / 255.0);
     gl_FragColor = vec4(mix(zoomColour, finalSketch, uFinal), 1.0);
   }
 `;

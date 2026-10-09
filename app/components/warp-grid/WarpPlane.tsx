@@ -18,6 +18,7 @@ export default function WarpPlane({ entry }: { entry: WarpEntry }) {
     let active = true;
     let ready = false;
     let opacity = 0;
+    let nearViewport = false;
     let rect = { left: 0, top: 0, width: 0, height: 0 };
     const geometry = new PlaneGeometry(1, 1, 1, warpConfig.segments);
     const material = new ShaderMaterial({
@@ -58,6 +59,7 @@ export default function WarpPlane({ entry }: { entry: WarpEntry }) {
       image.style.removeProperty("opacity");
     });
     const update = () => {
+      if (!nearViewport) { mesh.visible = false; return; }
       // Cards may parallax independently, so the DOM media and its canvas
       // counterpart need a fresh screen position on each shared scroll tick.
       measurePosition();
@@ -76,12 +78,17 @@ export default function WarpPlane({ entry }: { entry: WarpEntry }) {
     image.addEventListener("load", measure);
     const observer = new ResizeObserver(measure);
     observer.observe(image);
+    const visibility = new IntersectionObserver(([entry]) => {
+      nearViewport = entry.isIntersecting;
+    }, { rootMargin: "200px" });
+    visibility.observe(image);
     measure();
     return () => {
       active = false;
       scrollState.update.delete(update);
       scrollState.refresh.delete(measure);
       observer.disconnect();
+      visibility.disconnect();
       image.removeEventListener("load", measure);
       image.style.removeProperty("opacity");
       scene.remove(mesh);

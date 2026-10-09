@@ -1,18 +1,11 @@
 .hero {
-  --hero-lime: var(--accent);
+  --hero-lime: var(--primary);
   position: relative;
   width: 100%;
   background: var(--paper);
   color: var(--ink);
 }
 
-/* Keep these hidden while the loader slides away, before keyframes begin. */
-:global(html:not([data-portfolio-ready="true"]) .navbar),
-:global(html:not([data-portfolio-ready="true"]) [data-warp-canvas]) {
-  opacity: 0;
-  visibility: hidden;
-}
-:global(html[data-portfolio-ready="true"] .navbar) { animation: hero-nav-enter 0.9s var(--ease, cubic-bezier(.16, 1, .3, 1)) both 0.1s; }
 
 .stage {
   position: relative;
@@ -114,7 +107,7 @@
   position: absolute;
   z-index: -1;
   inset: 0;
-  background: var(--accent);
+  background: var(--primary);
   transform: scaleX(1);
   transform-origin: left;
 }
@@ -169,7 +162,6 @@
 .hero[data-hero-intro="true"] .figureIntro { animation: hero-figure-land 0.65s cubic-bezier(.3, .7, .3, 1) both 0.35s; }
 .hero[data-hero-intro="true"] .figureCaptionInner { animation: hero-caption-enter 0.8s var(--ease, cubic-bezier(.16, 1, .3, 1)) both 0.8s; }
 
-@keyframes hero-nav-enter { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: none; } }
 @keyframes hero-rise { from { transform: translateY(108%); } to { transform: none; } }
 @keyframes hero-highlight { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 @keyframes hero-copy-enter { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
@@ -211,7 +203,7 @@
 .secondary { background: transparent; }
 
 .actions a:hover,
-.actions a:focus-visible { background: var(--accent); color: var(--ink); outline: 2px solid var(--ink); outline-offset: 3px; }
+.actions a:focus-visible { background: var(--primary); color: var(--ink); outline: 2px solid var(--ink); outline-offset: 3px; }
 
 /* Both compositions share one viewport-sized stage. */
 .stage {
@@ -265,11 +257,9 @@
 .highlight { position: relative; transform-origin: left top; z-index: 1; }
 .hero[data-model-ready="true"] .fallbackFigure { visibility: hidden; }
 
-:global(html[data-portfolio-ready="true"] [data-warp-canvas][data-hero-figure-ready="true"]) { animation: hero-figure-land 0.65s cubic-bezier(.3, .7, .3, 1) both 0.35s; }
 
 .hero[data-hero-intro-skipped="true"] *,
-.hero[data-hero-intro-skipped="true"] *::before,
-:global(html[data-portfolio-ready="true"] [data-warp-canvas][data-hero-intro-skipped="true"]) {
+.hero[data-hero-intro-skipped="true"] *::before {
   animation: none !important;
 }
 
@@ -281,7 +271,5 @@
 @media (prefers-reduced-motion: reduce) {
   .hero .line { overflow: visible; }
   .hero * { opacity: 1 !important; }
-  .hero *,
-  :global(.navbar),
-  :global([data-warp-canvas]) { animation: none !important; }
+  .hero * { animation: none !important; }
 }

@@ -5,6 +5,7 @@ const baseURL = "http://localhost:3000";
 test("Case Studies artwork joins the shared scroll warp and restores for reduced motion", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto(baseURL);
+  await expect(page.locator('[aria-label="Loading portfolio"]')).toHaveCount(0, { timeout: 30000 });
   const images = page.locator("#case-studies img");
   await expect(images).toHaveCount(3);
   await images.first().scrollIntoViewIfNeeded();
@@ -16,6 +17,7 @@ test("Case Studies artwork joins the shared scroll warp and restores for reduced
 test("Hidden Gems cards drift at different scroll-parallax speeds", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto(baseURL);
+  await expect(page.locator('[aria-label="Loading portfolio"]')).toHaveCount(0, { timeout: 30000 });
   const cards = page.locator("#creative [data-parallax-card]");
   await expect(cards).toHaveCount(6);
   await cards.first().scrollIntoViewIfNeeded();

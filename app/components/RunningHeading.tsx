@@ -62,6 +62,8 @@ export default function RunningHeading({ steps, children }: Props) {
       let gridFrame = 0;
       let gridWidth = 0;
       let gridHeight = 0;
+      let lastGridKey = "";
+      let phraseIndex = -1;
       const gridPointer = { x: -1000, y: -1000 };
       const cancelNudge = () => {
         nudge?.kill();
@@ -113,8 +115,10 @@ export default function RunningHeading({ steps, children }: Props) {
         gridPointer.y = event.clientY - bounds.top;
       };
       const drawGrid = () => {
+        gridFrame = requestAnimationFrame(drawGrid);
         if (!gridCanvas) return;
         const bounds = surface.getBoundingClientRect();
+        if (bounds.bottom <= 0 || bounds.top >= window.innerHeight) return;
         const width = Math.round(bounds.width);
         const height = Math.round(bounds.height);
         const density = Math.min(window.devicePixelRatio || 1, 2);
@@ -128,40 +132,39 @@ export default function RunningHeading({ steps, children }: Props) {
         }
         const context = gridCanvas.getContext("2d");
         if (!context) return;
-        context.setTransform(density, 0, 0, density, 0, 0);
-        context.clearRect(0, 0, width, height);
         const computed = getComputedStyle(surface);
         const colour = computed.getPropertyValue("--grid-colour").trim() || "rgba(255, 255, 255, 0.075)";
-        const accent = computed.getPropertyValue("--accent").trim() || "#ddf96b";
+        const primary = computed.getPropertyValue("--primary").trim();
         const spacing = gsap.utils.clamp(40, 100, width * 0.05);
-        const sample = Math.max(8, spacing / 4);
+        const gridKey = `${width}:${height}:${colour}:${primary}:${Math.floor(gridPointer.x / spacing)}:${Math.floor(gridPointer.y / spacing)}`;
+        if (gridKey === lastGridKey) return;
+        lastGridKey = gridKey;
+        context.setTransform(density, 0, 0, density, 0, 0);
+        context.clearRect(0, 0, width, height);
         if (gridPointer.x >= 0 && gridPointer.y >= 0) {
           const cellX = Math.floor(gridPointer.x / spacing) * spacing;
           const cellY = Math.floor(gridPointer.y / spacing) * spacing;
-          context.fillStyle = accent;
+          context.fillStyle = primary || "transparent";
           context.fillRect(cellX, cellY, spacing, spacing);
         }
         context.strokeStyle = colour;
         context.lineWidth = 1;
         for (let y = 0; y <= height + spacing; y += spacing) {
           context.beginPath();
-          for (let x = -spacing; x <= width + spacing; x += sample) {
-            if (x === -spacing) context.moveTo(x, y);
-            else context.lineTo(x, y);
-          }
+          context.moveTo(0, y);
+          context.lineTo(width, y);
           context.stroke();
         }
         for (let x = 0; x <= width + spacing; x += spacing) {
           context.beginPath();
-          for (let y = -spacing; y <= height + spacing; y += sample) {
-            if (y === -spacing) context.moveTo(x, y);
-            else context.lineTo(x, y);
-          }
+          context.moveTo(x, 0);
+          context.lineTo(x, height);
           context.stroke();
         }
-        gridFrame = requestAnimationFrame(drawGrid);
       };
       const setPhrase = (next: number) => {
+        if (next === phraseIndex) return;
+        phraseIndex = next;
         const step = steps[next];
         const phrase = step.words.join("");
         glyphs.forEach((glyph, i) => {
