@@ -34,7 +34,11 @@ export default function WarpGrid({ items }: { items: CreativeWork[] }) {
     }
     const scrollState = runtime.current;
     const speeds = [-0.09, 0.12, -0.06, 0.1, -0.12, 0.07];
-    const origins = cards.map((card) => card.getBoundingClientRect().top + window.scrollY);
+    let origins: number[] = [];
+    const measure = () => {
+      origins = cards.map(card => card.getBoundingClientRect().top + window.scrollY
+        - new DOMMatrixReadOnly(getComputedStyle(card).transform).m42);
+    };
     const update = () => {
       const scroll = scrollState.scroll + window.innerHeight * 0.5;
       cards.forEach((card, index) => {
@@ -43,10 +47,13 @@ export default function WarpGrid({ items }: { items: CreativeWork[] }) {
         card.style.transform = `translate3d(0, ${offset.toFixed(2)}px, 0)`;
       });
     };
+    measure();
+    scrollState.refresh.add(measure);
     scrollState.update.add(update);
     update();
     return () => {
       scrollState.update.delete(update);
+      scrollState.refresh.delete(measure);
       cards.forEach((card) => { card.style.transform = ""; });
     };
   }, [motionEnabled, runtime]);

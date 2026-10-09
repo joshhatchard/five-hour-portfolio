@@ -9,10 +9,12 @@ export const vertexShader = /* glsl */ `
     float screenY = clamp(world.y / (uViewport.y * 0.5), -1.0, 1.0);
     float arc = 1.0 - sqrt(max(0.0, 1.0 - pow(screenY * 0.92, 2.0)));
     // Orthographic projection cannot show a Z-only bend; deform X/Y too.
-    world.x *= 1.0 + arc * abs(uVelocity) * 0.32;
-    world.y += sin(screenY * 3.14159265) * uVelocity * 12.0;
-    world.z += sin(uv.y * 3.14159265) * uVelocity * 20.0;
-    gl_Position = projectionMatrix * viewMatrix * world;
+    // One viewport-centred inverse barrel shared by every gallery item.
+    // Position drives the curve even when scrolling stops; velocity adds only
+    // a small, smoothly damped accent. The centre keeps a 1:1 pixel mapping.
+    world.x *= 1.0 + arc * (0.24 + abs(uVelocity) * 0.06);
+    // Explicit CSS-pixel projection avoids camera zoom or DPR changing sizes.
+    gl_Position = vec4(world.xy / (uViewport * 0.5), 0.0, 1.0);
   }
 `;
 

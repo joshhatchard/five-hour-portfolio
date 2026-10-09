@@ -15,7 +15,6 @@ export default function CaseStudies() {
       <Splash />
       <div className={styles.content}>
       <div className={styles.gallery} data-case-gallery>
-        <div className={styles.guides} aria-hidden="true"><i /><i /><i /><i /></div>
         {caseStudies.map((project) => (
           <article key={project.number} className={styles.project} aria-labelledby={`project-${project.number}`}>
             <figure className={styles.figure}>

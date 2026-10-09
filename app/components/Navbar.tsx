@@ -39,25 +39,36 @@ export default function Navbar() {
       });
       return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.179 ? "#11120d" : "#ffffff";
     };
+    const isPrimary = (background: string) => {
+      const channels = background.match(/[\d.]+/g)?.map(Number);
+      return Boolean(channels && Math.abs(channels[0] - 196) < 2 && Math.abs(channels[1] - 241) < 2 && Math.abs(channels[2] - 58) < 2);
+    };
     const update = () => {
       frame = 0;
       const header = ref.current;
       if (!header) return;
       const navY = header.getBoundingClientRect().top + header.offsetHeight / 2;
-      const work = document.querySelector<HTMLElement>("[data-work-surface]")?.parentElement;
+      const gallerySurface = document.querySelector<HTMLElement>("[data-gallery-surface]");
       const quote = document.getElementById("quote");
-      const workBounds = work?.getBoundingClientRect();
+      const heroFill = document.querySelector<HTMLElement>("[data-hero-fill]");
+      const galleryBounds = gallerySurface?.getBoundingClientRect();
       const quoteBounds = quote?.getBoundingClientRect();
-      const isInWork = Boolean(
-        workBounds && workBounds.top <= navY && workBounds.bottom >= navY
-        && !(quoteBounds && quoteBounds.top <= navY && quoteBounds.bottom >= navY),
-      );
-      const workColour = isInWork
-        ? foregroundFor(getComputedStyle(work!.querySelector<HTMLElement>("[data-work-surface]")!).backgroundColor)
+      const galleryColour = galleryBounds && galleryBounds.top <= navY && galleryBounds.bottom >= navY
+        ? foregroundFor(getComputedStyle(gallerySurface!).backgroundColor)
         : null;
+      const quoteColour = quote?.querySelector<HTMLElement>("[data-quote-colour]");
+      const isOnPrimary = Boolean(
+        quoteBounds && quoteBounds.top <= navY && quoteBounds.bottom >= navY
+        && quoteColour && Number(getComputedStyle(quoteColour).opacity) > 0.5
+        && isPrimary(getComputedStyle(quoteColour).backgroundColor),
+      ) || Boolean(heroFill && Number(getComputedStyle(heroFill).opacity) > 0.5 && (() => {
+        const bounds = heroFill.getBoundingClientRect();
+        return bounds.top <= navY && bounds.bottom >= navY && bounds.left <= innerWidth / 2 && bounds.right >= innerWidth / 2;
+      })());
+      header.dataset.surface = isOnPrimary ? "primary" : "default";
       header.querySelectorAll<HTMLElement>("a, button").forEach(link => {
-        if (workColour) {
-          link.style.color = workColour;
+        if (galleryColour) {
+          link.style.color = galleryColour;
           return;
         }
         const rect = link.getBoundingClientRect();
@@ -97,7 +108,7 @@ export default function Navbar() {
           <span aria-hidden="true" /><span aria-hidden="true" />
         </button>
         <div id="navigation-links" className="nav-links" onClick={() => setMenuOpen(false)}>
-          <a href="#work">Work</a>
+          <a href="#case-studies">Work</a>
           <a href="#creative">Creative</a>
           <a href="#about">About</a>
           <a href="#cta">Contact</a>

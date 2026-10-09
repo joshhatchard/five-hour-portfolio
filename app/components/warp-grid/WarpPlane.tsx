@@ -17,10 +17,10 @@ export default function WarpPlane({ entry }: { entry: WarpEntry }) {
     const strength = size.width < 768 ? warpConfig.mobileStrength : warpConfig.strength;
     let active = true;
     let ready = false;
-    let opacity = 0;
+    let sourceAspect = 1;
     let nearViewport = false;
     let rect = { left: 0, top: 0, width: 0, height: 0 };
-    const geometry = new PlaneGeometry(1, 1, 1, warpConfig.segments);
+    const geometry = new PlaneGeometry(1, 1, 32, warpConfig.segments);
     const material = new ShaderMaterial({
       vertexShader, fragmentShader, transparent: true, depthTest: false, depthWrite: false,
       uniforms: {
@@ -36,19 +36,20 @@ export default function WarpPlane({ entry }: { entry: WarpEntry }) {
     scene.add(mesh);
     const measurePosition = () => {
       const bounds = image.getBoundingClientRect();
-      rect = { left: bounds.left, top: bounds.top + window.scrollY, width: bounds.width, height: bounds.height };
+      // Use the image's live viewport rectangle. Mixing window.scrollY with
+      // Lenis's virtual position made the canvas copy drift and scale away
+      // from the DOM image during smooth scrolling.
+      rect = { left: bounds.left, top: bounds.top, width: bounds.width, height: bounds.height };
     };
     const measure = () => {
       measurePosition();
-      if (image.naturalWidth && rect.height) {
-        const imageAspect = image.naturalWidth / image.naturalHeight;
-        const planeAspect = rect.width / rect.height;
-        material.uniforms.uUvScale.value.set(Math.min(1, planeAspect / imageAspect), Math.min(1, imageAspect / planeAspect));
-      }
+      const boxAspect = rect.width / rect.height || sourceAspect;
+      material.uniforms.uUvScale.value.set(Math.min(1, boxAspect / sourceAspect), Math.min(1, sourceAspect / boxAspect));
     };
     const texture = new TextureLoader().load(entry.src, (loaded) => {
       if (!active) { loaded.dispose(); return; }
       loaded.colorSpace = SRGBColorSpace;
+      sourceAspect = loaded.image.width / loaded.image.height;
       gl.initTexture(loaded);
       material.uniforms.uTexture.value = loaded;
       ready = true;
@@ -63,19 +64,17 @@ export default function WarpPlane({ entry }: { entry: WarpEntry }) {
       // Cards may parallax independently, so the DOM media and its canvas
       // counterpart need a fresh screen position on each shared scroll tick.
       measurePosition();
-      const top = rect.top - scrollState.scroll;
+      const top = rect.top;
       mesh.visible = ready && rect.width > 0 && top < size.height + 100 && top + rect.height > -100;
       if (!mesh.visible) return;
       mesh.position.set(rect.left + rect.width / 2 - size.width / 2, size.height / 2 - top - rect.height / 2, 0);
       mesh.scale.set(rect.width, rect.height, 1);
       material.uniforms.uVelocity.value = scrollState.velocity / warpConfig.maxVelocity * strength;
-      opacity = Math.min(1, opacity + scrollState.delta / warpConfig.fadeDuration);
-      material.uniforms.uOpacity.value = opacity;
-      image.style.opacity = String(1 - opacity);
+      material.uniforms.uOpacity.value = 1;
     };
     scrollState.update.add(update);
     scrollState.refresh.add(measure);
-    image.addEventListener("load", measure);
+    mesh.onAfterRender = () => { image.style.opacity = "0"; };
     const observer = new ResizeObserver(measure);
     observer.observe(image);
     const visibility = new IntersectionObserver(([entry]) => {
@@ -89,7 +88,6 @@ export default function WarpPlane({ entry }: { entry: WarpEntry }) {
       scrollState.refresh.delete(measure);
       observer.disconnect();
       visibility.disconnect();
-      image.removeEventListener("load", measure);
       image.style.removeProperty("opacity");
       scene.remove(mesh);
       geometry.dispose();

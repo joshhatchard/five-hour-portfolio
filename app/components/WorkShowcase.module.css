@@ -1,0 +1,21 @@
+.work {
+  position: relative;
+  background: var(--ink);
+}
+
+.surface {
+  position: sticky;
+  top: 0;
+  z-index: 0;
+  height: 100svh;
+  margin-bottom: -100svh;
+  overflow: hidden;
+  background: var(--ink);
+  pointer-events: none;
+}
+
+.surface canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+}

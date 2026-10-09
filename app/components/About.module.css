@@ -1,6 +1,6 @@
 .section {
   position: relative;
-  padding-top: calc(100svh + var(--heading-breathing-room));
+  padding-top: clamp(6rem, 12vw, 12rem);
   padding-bottom: 0;
   padding-inline: var(--page-gutter);
   background: transparent;

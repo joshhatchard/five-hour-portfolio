@@ -19,7 +19,7 @@ const subscribeMotion = (callback: () => void) => {
   return () => query.removeEventListener("change", callback);
 };
 
-export type WarpEntry = { id: string; element: HTMLImageElement; src: string };
+export type WarpEntry = { id: string; element: HTMLElement; src: string };
 export type ScrollRuntime = {
   scroll: number;
   velocity: number;

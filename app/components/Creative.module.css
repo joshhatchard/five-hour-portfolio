@@ -8,7 +8,5 @@
 .gallery {
   position: relative;
   z-index: 2;
-  /* Offset the first card's authored top margin so it reaches the fold
-     as the Hidden Gems title finishes its reveal. */
-  padding: calc(100svh + var(--heading-breathing-room) - 4rem) 0 30svh;
+  padding: clamp(6rem, 12vw, 12rem) 0 30svh;
 }

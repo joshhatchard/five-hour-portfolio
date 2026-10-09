@@ -213,8 +213,6 @@
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  text-decoration: underline;
-  text-underline-offset: 0.3em;
 }
 
 @media (max-width: 700px) {
