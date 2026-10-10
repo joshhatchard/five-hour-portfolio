@@ -83,6 +83,7 @@
 }
 
 @media (max-width: 700px) {
+  .section { background: var(--ink); }
   .grid {
     display: block;
   }

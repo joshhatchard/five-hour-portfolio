@@ -9,3 +9,8 @@
   position: relative;
   padding: clamp(8rem, 16vw, 15rem) 0 30svh;
 }
+
+@media (max-width: 700px) {
+  .section { background: var(--paper); }
+  .gallery { padding-bottom: 8rem; }
+}

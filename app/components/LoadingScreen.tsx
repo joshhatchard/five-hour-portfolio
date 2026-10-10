@@ -86,6 +86,15 @@ export default function LoadingScreen({ runtime }: Props) {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    // The full loader has its own WebGL model. On phones that is an expensive
+    // fourth renderer and, on some mobile browsers, can prevent the loader
+    // from ever reporting ready. Keep the short handoff but skip WebGL.
+    if (window.matchMedia("(max-width: 700px)").matches) {
+      setReady(true);
+      const leaveTimer = window.setTimeout(() => setPhase("leaving"), 450);
+      return () => clearTimeout(leaveTimer);
+    }
+
     let renderer: WebGLRenderer;
     try {
       renderer = new WebGLRenderer({ canvas, alpha: true, antialias: true });

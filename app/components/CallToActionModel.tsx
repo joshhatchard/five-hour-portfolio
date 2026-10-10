@@ -13,6 +13,7 @@ export default function CallToActionModel() {
   const ref = useRef<HTMLCanvasElement>(null);
   const { runtime } = useScrollRuntime();
   useEffect(() => {
+    if (window.matchMedia("(max-width: 700px)").matches) return;
     const canvas = ref.current!;
     const actor = canvas.parentElement!;
     let renderer: WebGLRenderer;

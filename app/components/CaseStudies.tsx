@@ -5,10 +5,9 @@ import WarpTag from "./warp-grid/WarpTag";
 import { PageTransitionLink } from "./PageTransition";
 import styles from "./CaseStudies.module.css";
 
-// Replace the artwork and titles with finished case studies when ready.
 const caseStudies = [
-  { number: "01", title: "Project one", year: "2025", type: "Case study", href: "/work/project-one", src: "/case-studies/project-one.svg", alt: "Placeholder artwork: an oversized black asterisk on a warm grey background", hoverDirection: 2 as const },
-  { number: "02", title: "Project two", year: "2024", type: "Case study", href: "/work/project-two", src: "/case-studies/project-two.svg", alt: "Placeholder artwork: orange and lilac geometric forms on black", hoverDirection: 3 as const },
+  { number: "01", title: "Granic", year: "2025", type: "Product design", href: "/work/granic", src: "/projects/granic/thumbnail.jpg", alt: "Granic deadline tracker preview", hoverDirection: 2 as const },
+  { number: "02", title: "Designing for Country", year: "2025", type: "UI design + development", href: "/work/canvas", src: "/projects/canvas/thumbnail.jpg", alt: "University of Sydney First Nations support page preview", hoverDirection: 3 as const },
   { number: "03", title: "Project three", year: "2023", type: "Case study", href: "/work/project-three", src: "/case-studies/project-three.svg", alt: "Placeholder artwork: overlapping blue and green interface panels", hoverDirection: 1 as const },
 ];
 

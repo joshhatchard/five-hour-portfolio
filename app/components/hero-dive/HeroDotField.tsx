@@ -12,6 +12,7 @@ export default function HeroDotField() {
     const container = ref.current;
     const canvas = container?.querySelector("canvas");
     if (!container || !canvas) return;
+    if (window.matchMedia("(max-width: 700px)").matches) return;
     const context = canvas.getContext("2d", { alpha: true });
     if (!context) return;
 

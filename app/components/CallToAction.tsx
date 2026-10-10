@@ -92,6 +92,8 @@ export default function CallToAction() {
     gsap.registerPlugin(ScrollTrigger);
     const section = sectionRef.current;
     if (!section) return;
+    // Keep the contact details direct and lightweight on phones.
+    if (window.matchMedia("(max-width: 700px)").matches) return;
     section.dataset.animated = "true";
     const actor = section.querySelector<HTMLElement>("[data-cta-actor]")!;
     const colour = section.querySelector<HTMLElement>("[data-cta-colour]")!;

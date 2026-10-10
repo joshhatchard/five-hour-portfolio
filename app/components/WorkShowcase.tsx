@@ -22,6 +22,7 @@ export default function WorkShowcase({ children }: { children: ReactNode }) {
     const creative = work?.querySelector<HTMLElement>("#creative");
     const about = work?.querySelector<HTMLElement>("#about");
     if (!work || !surface || !canvas || !creative || !about) return;
+    if (window.matchMedia("(max-width: 700px)").matches) return;
 
     const context = canvas.getContext("2d");
     if (!context) return;

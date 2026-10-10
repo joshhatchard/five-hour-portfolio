@@ -78,11 +78,15 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
 
       media.add(
         {
-          animated: "(prefers-reduced-motion: no-preference)",
+          animated: "(min-width: 701px) and (prefers-reduced-motion: no-preference)",
           reduced: "(prefers-reduced-motion: reduce)",
+          compact: "(max-width: 700px)",
         },
         (context) => {
           const animated = Boolean(context.conditions?.animated);
+          // A phone keeps the composed SVG hero without the long, pinned 3D
+          // dive. This removes the heaviest continuous scroll animation.
+          if (context.conditions?.compact) return;
           if (animated) hero.dataset.dive = "true";
 
           const scrollState = runtime.current;

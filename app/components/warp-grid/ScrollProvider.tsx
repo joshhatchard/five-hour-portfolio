@@ -14,8 +14,14 @@ import { PageTransitionProvider } from "../PageTransition";
 
 const WarpCanvas = dynamic(() => import("./WarpCanvas"), { ssr: false });
 const motionQuery = "(prefers-reduced-motion: no-preference)";
+const desktopViewportQuery = "(min-width: 701px)";
 const subscribeMotion = (callback: () => void) => {
   const query = window.matchMedia(motionQuery);
+  query.addEventListener("change", callback);
+  return () => query.removeEventListener("change", callback);
+};
+const subscribeDesktopViewport = (callback: () => void) => {
+  const query = window.matchMedia(desktopViewportQuery);
   query.addEventListener("change", callback);
   return () => query.removeEventListener("change", callback);
 };
@@ -52,6 +58,11 @@ export function useScrollRuntime() {
 export default function ScrollProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const enabled = useSyncExternalStore(subscribeMotion, () => window.matchMedia(motionQuery).matches, () => false);
+  const desktopViewport = useSyncExternalStore(
+    subscribeDesktopViewport,
+    () => window.matchMedia(desktopViewportQuery).matches,
+    () => false,
+  );
   const [entries, setEntries] = useState<WarpEntry[]>([]);
   const runtime = useRef<ScrollRuntime>({ scroll: 0, velocity: 0, delta: 0, lenis: null, update: new Set(), measure: new Set(), commit: new Set(), refresh: new Set(), render: new Set(), backgroundRender: new Set(), heroes: new Set() });
   const register = useCallback((entry: WarpEntry) => {
@@ -61,7 +72,10 @@ export default function ScrollProvider({ children }: { children: ReactNode }) {
 
   useGSAP(() => {
     gsap.registerPlugin(ScrollTrigger, useGSAP);
-    const lenis = enabled ? new Lenis({
+    // Native touch scrolling is considerably more reliable on phones and
+    // avoids competing with the browser's own compositor and momentum.
+    const compactViewport = window.matchMedia("(max-width: 700px)").matches;
+    const lenis = enabled && !compactViewport ? new Lenis({
       // Share GSAP's clock so the page, WebGL, and scroll animations stay aligned.
       autoRaf: false,
       smoothWheel: true,
@@ -155,7 +169,7 @@ export default function ScrollProvider({ children }: { children: ReactNode }) {
     <ScrollContext.Provider value={value}>
       <PageTransitionProvider>
         {children}
-        <WarpCanvas />
+        {desktopViewport && <WarpCanvas />}
         <LoadingScreen runtime={runtime} />
       </PageTransitionProvider>
     </ScrollContext.Provider>

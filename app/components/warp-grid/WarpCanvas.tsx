@@ -1,11 +1,18 @@
 "use client";
 
-import { Component, useEffect, useState, type ReactNode } from "react";
+import { Component, useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
 import { NoToneMapping } from "three";
 import { useScrollRuntime } from "./ScrollProvider";
 import HeroDiver from "../hero-dive/HeroDiver";
 import WarpPlane from "./WarpPlane";
+
+const desktopMotionQuery = "(min-width: 701px)";
+const subscribeDesktopMotion = (callback: () => void) => {
+  const query = window.matchMedia(desktopMotionQuery);
+  query.addEventListener("change", callback);
+  return () => query.removeEventListener("change", callback);
+};
 
 class CanvasBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
@@ -36,7 +43,15 @@ function SceneObjects() {
 
 export default function WarpCanvas() {
   const [lost, setLost] = useState(false);
-  if (lost) return null;
+  const desktopMotion = useSyncExternalStore(
+    subscribeDesktopMotion,
+    () => window.matchMedia(desktopMotionQuery).matches,
+    () => false,
+  );
+  // Phones use the accessible DOM media and SVG illustration. Avoid creating
+  // a WebGL context at all: the hero, gallery and CTA otherwise compete for
+  // GPU memory during a touch scroll.
+  if (lost || !desktopMotion) return null;
   return (
     <CanvasBoundary>
       <div className="pointer-events-none fixed inset-0 z-10" data-warp-canvas aria-hidden="true" onContextMenu={(event) => event.preventDefault()}>

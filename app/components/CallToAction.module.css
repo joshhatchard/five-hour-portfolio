@@ -236,6 +236,21 @@
 }
 
 @media (max-width: 700px) {
+  .words,
+  .actor,
+  .spinCaption { display: none; }
+  .cta {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: min(calc(100% - (var(--page-gutter) * 2)), var(--content-width));
+    opacity: 1;
+    transform: none;
+  }
+  .cta [data-cta-word] { opacity: 1; transform: none; }
+  .ctaHighlight { transform: scaleX(1); }
+  .cta [data-cta-letter] { visibility: visible; }
+  .footer { opacity: 1; transform: none; }
   .stage { --spin-caption-width: clamp(7rem, 36vw, 9rem); }
   .ctaTitle { transform: translateY(4rem); }
   .cta h2 { white-space: normal; }

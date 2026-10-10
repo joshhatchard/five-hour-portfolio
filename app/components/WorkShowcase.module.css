@@ -19,3 +19,7 @@
   inset: 0;
   display: block;
 }
+
+@media (max-width: 700px) {
+  .surface { display: none; }
+}

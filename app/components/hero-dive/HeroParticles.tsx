@@ -43,6 +43,7 @@ export default function HeroParticles() {
   useEffect(() => {
     const container = ref.current;
     if (!container) return;
+    if (window.matchMedia("(max-width: 700px)").matches) return;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (reducedMotion.matches) return;
 
