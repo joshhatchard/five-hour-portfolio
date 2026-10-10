@@ -102,6 +102,10 @@
   position: relative;
   isolation: isolate;
 }
+.go [data-hero-send-letter] {
+  display: inline-block;
+  transform-origin: center bottom;
+}
 .go::before {
   content: "";
   position: absolute;

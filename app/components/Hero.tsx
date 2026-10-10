@@ -6,6 +6,8 @@ import HeroDotField from "./hero-dive/HeroDotField";
 import HeroParticles from "./hero-dive/HeroParticles";
 import styles from "./Hero.module.css";
 
+const fullSendLabel = "FULL SEND!";
+
 export default function Hero() {
   const heroRef = useRef<HTMLElement>(null);
   useHeroDive(heroRef);
@@ -95,7 +97,7 @@ export default function Hero() {
               if (event.target !== event.currentTarget) return;
               heroRef.current?.setAttribute("data-hero-entered", "true");
               window.dispatchEvent(new Event("resize"));
-            }}><span data-hero-copy>&amp; I&apos;M </span><strong className={`${styles.highlight} ${styles.go}`} data-hero-send>FULL SEND!</strong></span></span>
+            }}><span data-hero-copy>&amp; I&apos;M </span><strong className={`${styles.highlight} ${styles.go}`} data-hero-send aria-label={fullSendLabel}><span aria-hidden="true">{Array.from(fullSendLabel).map((letter, index) => letter === " " ? " " : <span key={`${letter}-${index}`} data-hero-send-letter>{letter}</span>)}</span></strong></span></span>
           </h1>
           <p className={styles.description} data-hero-copy>
             <span>Designer &amp; Developer (aka design technologist) turning ideas into fully functional digital products.</span>

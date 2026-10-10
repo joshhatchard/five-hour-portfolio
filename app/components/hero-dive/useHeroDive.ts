@@ -27,6 +27,7 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
       const stage = hero.querySelector<HTMLElement>("[data-hero-stage]")!;
       const svg = hero.querySelector<SVGSVGElement>("[data-hero-world]")!;
       const highlight = hero.querySelector<HTMLElement>("[data-hero-send]")!;
+      const fullSendLetters = highlight.querySelectorAll<HTMLElement>("[data-hero-send-letter]");
       const fill = hero.querySelector<HTMLElement>("[data-hero-fill]")!;
       const fullSendParticles = hero.querySelector<HTMLElement>("[data-hero-particles]")!;
       const dotField = hero.querySelector<HTMLElement>("[data-hero-dot-field]")!;
@@ -221,6 +222,12 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
             // upward with the scroll instead of dissolving it in place.
             const labelExit = smooth(0.72, 0.92, p);
             highlight.style.opacity = "1";
+            // Pulse each letter once across the flip, driven directly by scroll.
+            const flipProgress = clamp((p - 0.3) / 0.42);
+            fullSendLetters.forEach((letter, index) => {
+              const letterProgress = clamp((flipProgress - index * 0.06) / 0.48);
+              letter.style.scale = String(1 + Math.sin(letterProgress * Math.PI) * 0.18);
+            });
 
             // Expand into a centred, full-width title below the navigation.
             const labelMove = smooth(diveConfig.launch, 0.3, p);
@@ -321,6 +328,7 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
             scrollState.refresh.delete(measure);
             delete hero.dataset.dive;
             hero.style.removeProperty("--hero-scroll-height");
+            fullSendLetters.forEach(letter => letter.style.removeProperty("scale"));
             copy.forEach((element) => {
               element.style.removeProperty("opacity");
               element.style.removeProperty("transform");
