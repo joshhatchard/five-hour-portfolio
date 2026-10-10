@@ -100,10 +100,9 @@
 .callToActionMount {
   position: relative;
   z-index: 2;
-  width: 100vw;
+  width: calc(100% + var(--page-gutter) + var(--page-gutter));
   margin-top: 0;
-  margin-left: 50%;
-  transform: translateX(-50%);
+  margin-left: calc(-1 * var(--page-gutter));
 }
 
 @media (max-width: 700px) {

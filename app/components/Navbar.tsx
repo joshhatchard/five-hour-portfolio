@@ -5,10 +5,26 @@ import { useEffect, useRef, useState } from "react";
 export default function Navbar() {
   const ref = useRef<HTMLElement>(null);
   const menuButton = useRef<HTMLButtonElement>(null);
+  const menuExitTimer = useRef<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [menuVisible, setMenuVisible] = useState(false);
+
+  const closeMenu = () => {
+    setMenuOpen(false);
+    if (menuExitTimer.current) window.clearTimeout(menuExitTimer.current);
+    menuExitTimer.current = window.setTimeout(() => setMenuVisible(false), 500);
+  };
+  const openMenu = () => {
+    if (menuExitTimer.current) window.clearTimeout(menuExitTimer.current);
+    setMenuVisible(true);
+    requestAnimationFrame(() => setMenuOpen(true));
+  };
 
   useEffect(() => {
-    const close = () => setMenuOpen(false);
+    const close = closeMenu;
+    const closeOnDesktop = () => {
+      if (window.innerWidth > 700) close();
+    };
     const escape = (event: KeyboardEvent) => {
       if (event.key === "Escape" && menuOpen) {
         close();
@@ -18,15 +34,19 @@ export default function Navbar() {
     const outside = (event: PointerEvent) => {
       if (!ref.current?.contains(event.target as Node)) close();
     };
-    window.addEventListener("resize", close);
+    window.addEventListener("resize", closeOnDesktop);
     document.addEventListener("keydown", escape);
     document.addEventListener("pointerdown", outside);
     return () => {
-      window.removeEventListener("resize", close);
+      window.removeEventListener("resize", closeOnDesktop);
       document.removeEventListener("keydown", escape);
       document.removeEventListener("pointerdown", outside);
     };
   }, [menuOpen]);
+
+  useEffect(() => () => {
+    if (menuExitTimer.current) window.clearTimeout(menuExitTimer.current);
+  }, []);
 
   useEffect(() => {
     let frame = 0;
@@ -105,16 +125,16 @@ export default function Navbar() {
   }, []);
 
   return (
-    <header ref={ref} className="navbar" data-menu-open={menuOpen}>
+    <header ref={ref} className="navbar" data-menu-open={menuOpen} data-menu-visible={menuVisible}>
       <nav className="siteContainer" aria-label="Main navigation">
-        <a className="nav-wordmark" href="#hero" onClick={() => setMenuOpen(false)}>
+        <a className="nav-wordmark" href="#hero" onClick={closeMenu}>
           <span className="nav-mark" aria-hidden="true" />
           <span>Josh Hatchard</span>
         </a>
-        <button ref={menuButton} className="nav-toggle" type="button" aria-label={menuOpen ? "Close navigation" : "Open navigation"} aria-expanded={menuOpen} aria-controls="navigation-links" onClick={() => setMenuOpen(!menuOpen)}>
+        <button ref={menuButton} className="nav-toggle" type="button" aria-label={menuOpen ? "Close navigation" : "Open navigation"} aria-expanded={menuOpen} aria-controls="navigation-links" onClick={menuOpen ? closeMenu : openMenu}>
           <span aria-hidden="true" /><span aria-hidden="true" />
         </button>
-        <div id="navigation-links" className="nav-links" onClick={() => setMenuOpen(false)}>
+        <div id="navigation-links" className="nav-links" onClick={closeMenu}>
           <a href="#case-studies">Work</a>
           <a href="#creative">Creative</a>
           <a href="#about">About</a>
