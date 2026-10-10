@@ -33,15 +33,19 @@
   object-fit: cover;
 }
 
-.name {
-  position: relative;
+.tag {
+  position: absolute;
   z-index: 11;
-  width: fit-content;
-  margin-top: 0.9rem;
-  color: var(--primary);
-  font-family: var(--font-body);
-  font-size: clamp(1rem, 1.3vw, 1.25rem);
-  font-weight: 500;
+  top: 0;
+  right: 0;
+  padding: 0.45rem 0.7rem;
+  background: var(--primary);
+  color: var(--ink);
+  font-family: var(--font-label);
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.15;
+  text-transform: uppercase;
 }
 
 .bio {
@@ -53,7 +57,7 @@
 .intro,
 .background {
   margin: 0;
-  max-width: 25ch;
+  max-width: none;
   font-family: var(--font-body);
   font-size: clamp(2.1rem, 3.9vw, 4.75rem);
   font-weight: 400;
@@ -62,6 +66,8 @@
 }
 
 .accent { color: var(--primary); }
+
+.line { will-change: transform, opacity; }
 
 .background {
   margin-top: clamp(2.25rem, 4vw, 4.5rem);
@@ -83,5 +89,9 @@
   .portraitColumn { width: 100%; max-width: none; }
   .bio { margin-top: 3.5rem; }
   .intro,
-  .background { max-width: 18ch; font-size: clamp(1.9rem, 8.5vw, 3.4rem); }
+  .background { font-size: clamp(1.9rem, 8.5vw, 3.4rem); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .line { will-change: auto; }
 }

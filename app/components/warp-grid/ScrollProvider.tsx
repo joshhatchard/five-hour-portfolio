@@ -10,6 +10,7 @@ import { useGSAP } from "@gsap/react";
 import type { HeroController } from "../hero-dive/controller";
 import { warpConfig } from "./config";
 import LoadingScreen from "../LoadingScreen";
+import { PageTransitionProvider } from "../PageTransition";
 
 const WarpCanvas = dynamic(() => import("./WarpCanvas"), { ssr: false });
 const motionQuery = "(prefers-reduced-motion: no-preference)";
@@ -26,6 +27,8 @@ export type ScrollRuntime = {
   delta: number;
   lenis: Lenis | null;
   update: Set<() => void>;
+  measure: Set<() => void>;
+  commit: Set<() => void>;
   refresh: Set<() => void>;
   render: Set<() => void>;
   backgroundRender: Set<() => void>;
@@ -50,7 +53,7 @@ export default function ScrollProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const enabled = useSyncExternalStore(subscribeMotion, () => window.matchMedia(motionQuery).matches, () => false);
   const [entries, setEntries] = useState<WarpEntry[]>([]);
-  const runtime = useRef<ScrollRuntime>({ scroll: 0, velocity: 0, delta: 0, lenis: null, update: new Set(), refresh: new Set(), render: new Set(), backgroundRender: new Set(), heroes: new Set() });
+  const runtime = useRef<ScrollRuntime>({ scroll: 0, velocity: 0, delta: 0, lenis: null, update: new Set(), measure: new Set(), commit: new Set(), refresh: new Set(), render: new Set(), backgroundRender: new Set(), heroes: new Set() });
   const register = useCallback((entry: WarpEntry) => {
     setEntries((current) => [...current.filter((item) => item.id !== entry.id), entry]);
     return () => setEntries((current) => current.filter((item) => item !== entry));
@@ -120,6 +123,9 @@ export default function ScrollProvider({ children }: { children: ReactNode }) {
       runtime.current.scroll = window.scrollY;
       runtime.current.delta = delta / 1000;
       runtime.current.update.forEach((callback) => callback());
+      // Finish transforms first, then batch geometry reads before DOM writes.
+      runtime.current.measure.forEach((callback) => callback());
+      runtime.current.commit.forEach((callback) => callback());
       runtime.current.render.forEach((callback) => callback());
     };
     lenis?.on("scroll", ScrollTrigger.update);
@@ -147,9 +153,11 @@ export default function ScrollProvider({ children }: { children: ReactNode }) {
   const value = useMemo(() => ({ runtime, entries, register, motionEnabled: enabled }), [runtime, entries, register, enabled]);
   return (
     <ScrollContext.Provider value={value}>
-      {children}
-      <WarpCanvas />
-      <LoadingScreen runtime={runtime} />
+      <PageTransitionProvider>
+        {children}
+        <WarpCanvas />
+        <LoadingScreen runtime={runtime} />
+      </PageTransitionProvider>
     </ScrollContext.Provider>
   );
 }

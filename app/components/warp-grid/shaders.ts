@@ -24,13 +24,29 @@ export const fragmentShader = /* glsl */ `
   uniform float uRgbShift;
   uniform float uOpacity;
   uniform vec2 uUvScale;
+  uniform float uHover;
+  uniform float uHoverEnabled;
+  uniform float uHoverDirection;
+  uniform sampler2D uPrimaryTexture;
   varying vec2 vUv;
+
   void main() {
     vec2 uv = (vUv - 0.5) * uUvScale + 0.5;
     float offset = abs(uVelocity) * uRgbShift;
     vec4 colour = texture2D(uTexture, uv);
-    colour.r = texture2D(uTexture, uv + vec2(offset, 0.0)).r;
-    colour.b = texture2D(uTexture, uv - vec2(offset, 0.0)).b;
+    if (offset > 0.0) {
+      colour.r = texture2D(uTexture, uv + vec2(offset, 0.0)).r;
+      colour.b = texture2D(uTexture, uv - vec2(offset, 0.0)).b;
+    }
+    if (uHoverEnabled > 0.5) {
+      float progress = uHover;
+      float limePanel = uHoverDirection < 0.5 ? step(vUv.x, progress)
+        : uHoverDirection < 1.5 ? step(1.0 - vUv.x, progress)
+        : uHoverDirection < 2.5 ? step(1.0 - vUv.y, progress)
+        : step(vUv.y, progress);
+      vec3 lime = texture2D(uPrimaryTexture, vec2(0.5)).rgb;
+      colour.rgb = mix(colour.rgb, lime, limePanel);
+    }
     gl_FragColor = vec4(colour.rgb, colour.a * uOpacity);
     #include <tonemapping_fragment>
     #include <colorspace_fragment>

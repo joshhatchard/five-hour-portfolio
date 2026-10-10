@@ -135,20 +135,25 @@ export default function CallToActionModel() {
       headPivot.add(model);
       actor.dataset.modelReady = "true";
     }, undefined, () => {});
+    let nearViewport = false;
+    const visibility = new IntersectionObserver(([entry]) => {
+      nearViewport = entry.isIntersecting;
+    }, { rootMargin: "100px" });
+    visibility.observe(actor.closest("section")!);
     const render = () => {
-      const section = actor.closest("section")!.getBoundingClientRect();
-      if (!model || section.bottom < 0 || section.top > innerHeight) return;
+      if (!model || !nearViewport) return;
       const style = getComputedStyle(actor);
+      const idleAmount = Math.max(0, Math.min(1, parseFloat(style.getPropertyValue("--cta-idle")) || 0));
+      // Keep pointer eligibility current even while skipping hidden GPU work.
+      actor.dataset.interactive = String(idleAmount > 0.7);
       if (style.visibility === "hidden") return;
       const now = performance.now();
       const delta = Math.min(0.05, (now - lastFrame) / 1000);
       lastFrame = now;
       const degrees = parseFloat(style.getPropertyValue("--cta-spin")) || 0;
-      const idleAmount = Math.max(0, Math.min(1, parseFloat(style.getPropertyValue("--cta-idle")) || 0));
       const idle = idleAmount > 0;
       const pointerX = parseFloat(style.getPropertyValue("--cta-pointer-x")) || 0;
       const pointerY = parseFloat(style.getPropertyValue("--cta-pointer-y")) || 0;
-      actor.dataset.interactive = String(idleAmount > 0.7);
       if (idle && !dragging) idleAngle += delta * 0.9 * idleAmount;
       if (!atPageEnd() || !idle || dragging) endScrollSpeed = 0;
       idleAngle += endScrollSpeed * delta;
@@ -178,6 +183,7 @@ export default function CallToActionModel() {
     renders.add(render);
     return () => {
       active = false;
+      visibility.disconnect();
       window.removeEventListener("wheel", wheel);
       window.removeEventListener("touchstart", touchStart);
       window.removeEventListener("touchmove", touchMove);

@@ -45,7 +45,7 @@ export default function WarpCanvas() {
           orthographic
           camera={{ position: [0, 0, 1000], near: 0.1, far: 2000, zoom: 1 }}
           frameloop="never"
-          dpr={[1, 1.5]}
+          dpr={[1, 1.25]}
           gl={{ alpha: true, antialias: true, toneMapping: NoToneMapping }}
           fallback={null}
           onCreated={({ gl }) => {

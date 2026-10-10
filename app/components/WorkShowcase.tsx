@@ -46,27 +46,30 @@ export default function WorkShowcase({ children }: { children: ReactNode }) {
       if (key === previousKey) return;
       previousKey = key;
       surface.style.backgroundColor = background;
-      canvas.width = Math.max(1, Math.round(width * density));
-      canvas.height = Math.max(1, Math.round(height * density));
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
+      const pixelWidth = Math.max(1, Math.round(width * density));
+      const pixelHeight = Math.max(1, Math.round(height * density));
+      // Colour fades must not reallocate the full-screen canvas every frame.
+      if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
+        canvas.width = pixelWidth;
+        canvas.height = pixelHeight;
+        canvas.style.width = `${width}px`;
+        canvas.style.height = `${height}px`;
+      }
       context.setTransform(density, 0, 0, density, 0, 0);
       context.clearRect(0, 0, width, height);
       context.strokeStyle = grid;
       context.globalAlpha = 0.34;
       context.lineWidth = 1;
+      context.beginPath();
       for (let y = 0; y <= height; y += spacing) {
-        context.beginPath();
         context.moveTo(0, y);
         context.lineTo(width, y);
-        context.stroke();
       }
       for (let x = 0; x <= width; x += spacing) {
-        context.beginPath();
         context.moveTo(x, 0);
         context.lineTo(x, height);
-        context.stroke();
       }
+      context.stroke();
       context.globalAlpha = 1;
     };
     const schedule = () => { if (!frame) frame = requestAnimationFrame(draw); };

@@ -7,6 +7,10 @@
 }
 
 .item { position: relative; min-width: 0; }
+.link { position: relative; display: block; color: inherit; text-decoration: none; }
+.link:focus-visible { outline: 2px solid var(--ink); outline-offset: 0.45rem; }
+/* Creative artwork is deliberately compact, so use a quieter hover mark here. */
+.link [data-warp-hover-mark] { width: clamp(1.5rem, 8%, 3.75rem); }
 /* Keep Creative intentionally smaller and lighter than the case studies. */
 .item:nth-child(1) { grid-column: 6 / 9; }
 .item:nth-child(2) { grid-column: 10 / -1; }
@@ -70,6 +74,10 @@
 @media (max-width: 700px) {
   .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3.5rem 1rem; padding-inline: 0; }
   .item:nth-child(n) { grid-column: auto; grid-row: auto; margin-top: 0; }
+  /* Clear any inline desktop drift when the viewport enters the compact grid. */
+  .card,
+  .tag { transform: none !important; will-change: auto; }
+  .link [data-warp-hover-mark] { width: clamp(1.9rem, 12%, 2.5rem); }
   .figure::before { display: none; }
   .caption { font-size: 0.75rem; }
 }

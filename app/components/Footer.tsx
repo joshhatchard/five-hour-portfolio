@@ -1,4 +1,4 @@
-export default function Footer({ className = "" }: { className?: string }) {
+export default function Footer({ className = "", backHref = "#hero" }: { className?: string; backHref?: string }) {
   return (
     <footer className={`footer ${className}`.trim()}>
       <div className="siteContainer">
@@ -6,7 +6,7 @@ export default function Footer({ className = "" }: { className?: string }) {
         <div className="footerRight">
           <p>Live the most</p>
         </div>
-        <a className="footerBack" href="#hero" aria-label="Back to top"><span aria-hidden="true">↑</span></a>
+        <a className="footerBack" href={backHref} aria-label="Back to top"><span aria-hidden="true">↑</span></a>
       </div>
     </footer>
   );

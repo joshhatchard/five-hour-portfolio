@@ -273,7 +273,9 @@ export function useHeroDive(ref: RefObject<HTMLElement | null>) {
             controller.visible =
               rect.top < controller.height &&
               controller.waterline > -controller.height * 0.1;
-            if (controller.visible) controller.renderDom();
+            // The model renderer updates the DOM after calculating its camera.
+            // Only perform this fallback pass before the model is available.
+            if (controller.visible && hero.dataset.modelReady !== "true") controller.renderDom();
           };
 
           measure();

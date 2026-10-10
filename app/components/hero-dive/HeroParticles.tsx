@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { Camera, Geometry, Mesh, Program, Renderer } from "ogl";
 import styles from "./HeroParticles.module.css";
 import { diveConfig, smooth } from "./controller";
+import { useScrollRuntime } from "../warp-grid/ScrollProvider";
 
 const vertex = /* glsl */ `
   attribute vec3 position;
@@ -37,6 +38,7 @@ const fragment = /* glsl */ `
 
 export default function HeroParticles() {
   const ref = useRef<HTMLDivElement>(null);
+  const { runtime } = useScrollRuntime();
 
   useEffect(() => {
     const container = ref.current;
@@ -112,15 +114,11 @@ export default function HeroParticles() {
     window.addEventListener("pointermove", pointer, { passive: true });
     resize();
 
-    let frame = 0;
-    const render = (time: number) => {
-      frame = requestAnimationFrame(render);
+    const render = () => {
       const progress = Number(hero?.dataset.diveProgress ?? 0);
       if (!visible || document.hidden || progress <= 0.2) return;
-      // The fill begins as a small label and expands during the dive. Check
-      // its live size here as well as observing it, so the first visible frame
-      // is always rendered at the expanded canvas size.
-      resize();
+      // ResizeObserver handles the expanding fill; avoid a synchronous layout
+      // measurement on every particle frame. Share the page's animation clock.
       mouse.x += (mouse.targetX - mouse.x) * 0.05;
       mouse.y += (mouse.targetY - mouse.y) * 0.05;
       const orbitProgress = smooth(0.2, diveConfig.cameraNeutral, progress);
@@ -133,13 +131,14 @@ export default function HeroParticles() {
       particles.position.y = mouse.y * 0.8 + Math.sin(elevation) * 1.6;
       camera.position.x = -mouse.x * 0.75;
       camera.position.y = -mouse.y * 0.5;
-      program.uniforms.uTime.value = time * 0.00035 + progress * 5;
+      program.uniforms.uTime.value = performance.now() * 0.00035 + progress * 5;
       renderer.render({ scene: particles, camera });
     };
-    frame = requestAnimationFrame(render);
+    const renders = runtime.current.render;
+    renders.add(render);
 
     return () => {
-      cancelAnimationFrame(frame);
+      renders.delete(render);
       observer.disconnect();
       visibility.disconnect();
       window.removeEventListener("pointermove", pointer);
@@ -147,7 +146,7 @@ export default function HeroParticles() {
       program.remove();
       if (container.contains(gl.canvas)) container.removeChild(gl.canvas);
     };
-  }, []);
+  }, [runtime]);
 
   return <div ref={ref} className={styles.particles} data-hero-particles aria-hidden="true" />;
 }

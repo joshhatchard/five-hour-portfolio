@@ -4,22 +4,27 @@ import { useEffect, useRef } from "react";
 import WarpImage from "./WarpImage";
 import WarpTag from "./WarpTag";
 import { useScrollRuntime } from "./ScrollProvider";
+import { PageTransitionLink } from "../PageTransition";
+import WarpHoverMark from "../WarpHoverMark";
 import styles from "./WarpGrid.module.css";
 
-export type CreativeWork = { title: string; tag: string; src: string; alt: string };
+export type CreativeWork = { title: string; tag: string; href: string; src: string; alt: string };
 
-function GridItem({ work }: { work: CreativeWork }) {
+function GridItem({ work, hoverDirection }: { work: CreativeWork; hoverDirection: 0 | 1 | 2 | 3 }) {
   return (
     <article className={styles.item}>
-      <div className={styles.card} data-parallax-card>
-        <figure className={styles.figure}>
-          <WarpImage src={work.src} alt={work.alt} width={800} height={600} className={styles.image} />
-          <figcaption className={styles.caption}>
-            <h3>{work.title}</h3>
-          </figcaption>
-        </figure>
-      </div>
-      <WarpTag className={styles.tag} parallax>{work.tag}</WarpTag>
+      <PageTransitionLink className={styles.link} href={work.href} rememberPosition data-card-hover-target>
+        <div className={styles.card} data-parallax-card>
+          <figure className={styles.figure} data-card-hover-layer>
+            <WarpImage src={work.src} alt={work.alt} width={800} height={600} className={styles.image} hoverOverlay hoverDirection={hoverDirection} />
+            <figcaption className={styles.caption}>
+              <h3>{work.title}</h3>
+            </figcaption>
+          </figure>
+        </div>
+        <WarpHoverMark direction={hoverDirection} />
+        <WarpTag className={styles.tag} parallax>{work.tag}</WarpTag>
+      </PageTransitionLink>
     </article>
   );
 }
@@ -40,6 +45,7 @@ export default function WarpGrid({ items }: { items: CreativeWork[] }) {
     const speeds = [-0.012, 0.016, -0.01, 0.014, -0.016];
     const maxOffset = 24;
     let origins: number[] = [];
+    const previousOffsets: string[] = [];
     const measure = () => {
       origins = cards.map(card => card.getBoundingClientRect().top + window.scrollY
         - new DOMMatrixReadOnly(getComputedStyle(card).transform).m42);
@@ -49,8 +55,11 @@ export default function WarpGrid({ items }: { items: CreativeWork[] }) {
       cards.forEach((card, index) => {
         const distance = (scroll - origins[index]) * speeds[index % speeds.length];
         const offset = Math.max(-maxOffset, Math.min(maxOffset, distance));
-        card.style.transform = `translate3d(0, ${offset.toFixed(2)}px, 0)`;
-        tags[index]?.style.setProperty("transform", `translate3d(0, ${offset.toFixed(2)}px, 0)`);
+        const roundedOffset = offset.toFixed(2);
+        if (previousOffsets[index] === roundedOffset) return;
+        previousOffsets[index] = roundedOffset;
+        card.style.transform = `translate3d(0, ${roundedOffset}px, 0)`;
+        tags[index]?.style.setProperty("transform", `translate3d(0, ${roundedOffset}px, 0)`);
       });
     };
     measure();
@@ -66,7 +75,7 @@ export default function WarpGrid({ items }: { items: CreativeWork[] }) {
   }, [motionEnabled, runtime]);
   return (
     <div ref={ref} className={styles.grid}>
-      {items.map((work) => <GridItem key={work.src} work={work} />)}
+      {items.map((work, index) => <GridItem key={work.src} work={work} hoverDirection={([2, 1, 3, 0, 2] as const)[index % 5]} />)}
     </div>
   );
 }

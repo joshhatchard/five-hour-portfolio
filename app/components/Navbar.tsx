@@ -1,8 +1,21 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { PageTransitionLink } from "./PageTransition";
 
-export default function Navbar() {
+type NavbarProps = {
+  page?: "home" | "case-study";
+};
+
+export default function Navbar({ page = "home" }: NavbarProps) {
+  const isCaseStudy = page === "case-study";
+  const hrefFor = (id: string) => isCaseStudy ? `/#${id}` : `#${id}`;
+  const navItems = [
+    { id: "case-studies", label: "Work" },
+    { id: "creative", label: "Creative" },
+    { id: "about", label: "About" },
+    { id: "cta", label: "Contact" },
+  ];
   const ref = useRef<HTMLElement>(null);
   const menuButton = useRef<HTMLButtonElement>(null);
   const menuExitTimer = useRef<number | null>(null);
@@ -67,6 +80,11 @@ export default function Navbar() {
       frame = 0;
       const header = ref.current;
       if (!header) return;
+      if (isCaseStudy) {
+        header.dataset.surface = "case-study";
+        header.querySelectorAll<HTMLElement>("a, button").forEach(link => { link.style.color = "#ffffff"; });
+        return;
+      }
       const navY = header.getBoundingClientRect().top + header.offsetHeight / 2;
       const gallerySurface = document.querySelector<HTMLElement>("[data-gallery-surface]");
       const cta = document.getElementById("call-to-action");
@@ -88,15 +106,14 @@ export default function Navbar() {
         const bounds = heroFill.getBoundingClientRect();
         return bounds.top <= navY && bounds.bottom >= navY && bounds.left <= innerWidth / 2 && bounds.right >= innerWidth / 2;
       })());
-      header.dataset.surface = isOnCta ? "cta" : isOnPrimary ? "primary" : "default";
-      header.querySelectorAll<HTMLElement>("a, button").forEach(link => {
+      const surface = isOnCta ? "cta" : isOnPrimary ? "primary" : "default";
+      // Complete hit-testing/layout reads before changing any link styles.
+      const colours = Array.from(header.querySelectorAll<HTMLElement>("a, button"), link => {
         if (isOnCta) {
-          link.style.color = "#11120d";
-          return;
+          return { link, colour: "#11120d" };
         }
         if (galleryColour) {
-          link.style.color = galleryColour;
-          return;
+          return { link, colour: galleryColour };
         }
         const rect = link.getBoundingClientRect();
         const underneath = document.elementsFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
@@ -110,11 +127,18 @@ export default function Navbar() {
           colour = nextColour;
           break;
         }
+        return { link, colour };
+      });
+      if (header.dataset.surface !== surface) header.dataset.surface = surface;
+      colours.forEach(({ link, colour }) => {
+        if (link.dataset.navColour === colour) return;
+        link.dataset.navColour = colour;
         link.style.color = colour;
       });
     };
     const schedule = () => { if (!frame) frame = requestAnimationFrame(update); };
     update();
+    if (isCaseStudy) return;
     window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", schedule);
     return () => {
@@ -122,23 +146,29 @@ export default function Navbar() {
       window.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", schedule);
     };
-  }, []);
+  }, [isCaseStudy]);
 
   return (
-    <header ref={ref} className="navbar" data-menu-open={menuOpen} data-menu-visible={menuVisible}>
+    <header ref={ref} className="navbar" data-entrance={isCaseStudy ? undefined : "home"} data-surface={isCaseStudy ? "case-study" : undefined} data-menu-open={menuOpen} data-menu-visible={menuVisible}>
       <nav className="siteContainer" aria-label="Main navigation">
-        <a className="nav-wordmark" href="#hero" onClick={closeMenu}>
-          <span className="nav-mark" aria-hidden="true" />
-          <span>Josh Hatchard</span>
-        </a>
+        {isCaseStudy ? (
+          <PageTransitionLink className="nav-wordmark" href="/" onClick={closeMenu}>
+            <span className="nav-mark" aria-hidden="true" />
+            <span>Josh Hatchard</span>
+          </PageTransitionLink>
+        ) : (
+          <a className="nav-wordmark" href="#hero" onClick={closeMenu}>
+            <span className="nav-mark" aria-hidden="true" />
+            <span>Josh Hatchard</span>
+          </a>
+        )}
         <button ref={menuButton} className="nav-toggle" type="button" aria-label={menuOpen ? "Close navigation" : "Open navigation"} aria-expanded={menuOpen} aria-controls="navigation-links" onClick={menuOpen ? closeMenu : openMenu}>
           <span aria-hidden="true" /><span aria-hidden="true" />
         </button>
         <div id="navigation-links" className="nav-links" onClick={closeMenu}>
-          <a href="#case-studies">Work</a>
-          <a href="#creative">Creative</a>
-          <a href="#about">About</a>
-          <a href="#cta">Contact</a>
+          {navItems.map(({ id, label }) => isCaseStudy ? (
+            <PageTransitionLink key={id} href={hrefFor(id)} resetScroll={false}>{label}</PageTransitionLink>
+          ) : <a key={id} href={hrefFor(id)}>{label}</a>)}
         </div>
       </nav>
     </header>

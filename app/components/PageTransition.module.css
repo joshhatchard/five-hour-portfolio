@@ -1,0 +1,30 @@
+@property --aperture-size {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 160vmax;
+}
+
+.wipe {
+  --aperture-size: 160vmax;
+  position: fixed;
+  z-index: 200;
+  inset: 0;
+  pointer-events: none;
+  background: var(--primary);
+  -webkit-mask-image: radial-gradient(circle at center, transparent 0 var(--aperture-size), #000 calc(var(--aperture-size) + 1px));
+  mask-image: radial-gradient(circle at center, transparent 0 var(--aperture-size), #000 calc(var(--aperture-size) + 1px));
+  transition: --aperture-size 700ms var(--ease);
+}
+
+.wipe[data-phase="covering"],
+.wipe[data-phase="revealing"] {
+  pointer-events: auto;
+}
+
+.wipe[data-phase="covering"] { --aperture-size: 0px; }
+
+.wipe[data-phase="revealing"] { --aperture-size: 160vmax; }
+
+@media (prefers-reduced-motion: reduce) {
+  .wipe { transition-duration: 1ms; }
+}

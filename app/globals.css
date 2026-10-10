@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 /* Global entrance elements live outside the hero CSS-module subtree. */
-html:not([data-portfolio-ready="true"]) .navbar,
+html:not([data-portfolio-ready="true"]) .navbar[data-entrance="home"],
 html:not([data-portfolio-ready="true"]) [data-warp-canvas] {
   opacity: 0;
   visibility: hidden;
 }
-html[data-portfolio-ready="true"] .navbar {
+html[data-portfolio-ready="true"] .navbar[data-entrance="home"] {
   animation: portfolio-nav-enter 0.9s var(--ease) both 0.1s;
 }
 html[data-portfolio-ready="true"] [data-warp-canvas][data-hero-figure-ready="true"] {
@@ -78,6 +78,18 @@ body {
 .navbar[data-surface="cta"] .nav-links a,
 .navbar[data-surface="cta"] .nav-wordmark,
 .navbar[data-surface="cta"] .nav-toggle {
+  color: var(--ink) !important;
+}
+
+.navbar[data-surface="case-study"] .nav-links a,
+.navbar[data-surface="case-study"] .nav-wordmark,
+.navbar[data-surface="case-study"] .nav-toggle {
+  color: var(--paper) !important;
+}
+.navbar[data-surface="case-study"] .nav-links a:hover,
+.navbar[data-surface="case-study"] .nav-links a:focus-visible,
+.navbar[data-surface="case-study"] .nav-wordmark:hover,
+.navbar[data-surface="case-study"] .nav-wordmark:focus-visible {
   color: var(--ink) !important;
 }
 
