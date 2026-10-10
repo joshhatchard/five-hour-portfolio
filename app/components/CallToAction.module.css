@@ -1,11 +1,13 @@
 .section {
-  --quote-colour: var(--paper);
+  --cta-colour: var(--paper);
   position: relative;
   z-index: 12;
   background: var(--paper);
 }
 
 .stage {
+  --cta-actor-size: clamp(9rem, 18vw, 15rem);
+  --spin-caption-width: clamp(8rem, 14vw, 11rem);
   position: relative;
   display: grid;
   place-items: center;
@@ -14,16 +16,16 @@
   background: var(--paper);
 }
 
-.colour { position: absolute; inset: 0; background: var(--quote-colour); pointer-events: none; }
+.colour { position: absolute; inset: 0; background: var(--cta-colour); pointer-events: none; }
 .actor {
   /* ScrollTrigger can revert inline setup before the timeline starts. */
-  --quote-idle: 1;
-  --quote-spin: 0;
-  --quote-flat: 0;
-  --quote-final: 1;
+  --cta-idle: 1;
+  --cta-spin: 0;
+  --cta-flat: 0;
+  --cta-final: 1;
   display: none;
   position: absolute;
-  width: clamp(9rem, 18vw, 15rem);
+  width: var(--cta-actor-size);
   aspect-ratio: 1;
   color: var(--ink);
   transform-origin: 50% 16%;
@@ -45,9 +47,9 @@
 .spinCaption {
   position: absolute;
   z-index: 4;
-  left: calc(50% - clamp(11.75rem, 25vw, 18.75rem));
-  top: calc(50% - clamp(13.25rem, 23svh, 17.25rem));
-  width: clamp(10rem, 17vw, 14rem);
+  left: calc(50% - var(--spin-caption-width) + 1.75rem);
+  top: calc(50% - min(13svh, 110px) - var(--cta-actor-size) * 0.43 - var(--spin-caption-width) * 0.3);
+  width: var(--spin-caption-width);
   height: auto;
   overflow: visible;
   color: var(--ink);
@@ -142,6 +144,14 @@
   z-index: -1;
   background: var(--primary);
 }
+@keyframes cta-leap-shake {
+  0%, 100% { translate: 0; rotate: 0deg; }
+  20%, 60% { translate: -2px 0; rotate: -1.5deg; }
+  40%, 80% { translate: 2px 0; rotate: 1.5deg; }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .cta h2 strong:hover { animation: cta-leap-shake 0.4s ease-in-out; }
+}
 
 .contactLinks {
   position: absolute;
@@ -153,9 +163,11 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-family: var(--font-body);
-  font-size: clamp(0.9375rem, 1.1vw, 1rem);
-  font-weight: 500;
+  font-family: var(--font-label);
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
 }
 
 .socialLinks { display: flex; gap: 2rem; }
@@ -188,6 +200,7 @@
 .contactLinks a:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 
 .contactLinks a[aria-disabled="true"] { color: color-mix(in srgb, var(--ink) 55%, var(--paper)); }
+.contactLinks [data-cta-letter] { display: inline-block; }
 .footer {
   position: absolute;
   inset-inline: 0;
@@ -211,20 +224,23 @@
 .footer :global(.footerRight) { margin-left: auto; }
 .footer :global(.footerBack) {
   position: absolute;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  margin: 0;
+  padding: 0;
+  place-items: center;
+  transform: translate(-50%, -50%);
 }
 
 @media (max-width: 700px) {
-  .spinCaption {
-    left: max(var(--page-gutter), calc(50% - 9.75rem));
-    top: calc(50% - 12.25rem);
-    width: 10rem;
-  }
+  .stage { --spin-caption-width: clamp(7rem, 36vw, 9rem); }
   .ctaTitle { transform: translateY(4rem); }
   .cta h2 { white-space: normal; }
   .contactLinks { bottom: 6rem; flex-direction: column; gap: 1rem; }
-  .footer :global(.siteContainer) { flex-direction: column; gap: 0.35rem; }
+  .footer :global(.siteContainer) { width: calc(100% - 2.5rem); flex-direction: row; align-items: center; gap: 0.75rem; }
   .footer :global(.footerRight) { display: none; }
-  .footer :global(.footerBack) { position: static; align-self: center; transform: none; }
+  .footer :global(.footerBack) { position: relative; top: auto; left: auto; flex: 0 0 2rem; transform: none; }
 }

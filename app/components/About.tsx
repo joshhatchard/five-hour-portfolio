@@ -30,7 +30,7 @@ export default function About({ children }: { children?: ReactNode }) {
           </p>
         </div>
       </div>
-      {children && <div className={styles.quoteMount}>{children}</div>}
+      {children && <div className={styles.callToActionMount}>{children}</div>}
     </section>
   );
 }

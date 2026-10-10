@@ -49,24 +49,31 @@ export default function Navbar() {
       if (!header) return;
       const navY = header.getBoundingClientRect().top + header.offsetHeight / 2;
       const gallerySurface = document.querySelector<HTMLElement>("[data-gallery-surface]");
-      const quote = document.getElementById("quote");
+      const cta = document.getElementById("call-to-action");
       const heroFill = document.querySelector<HTMLElement>("[data-hero-fill]");
       const galleryBounds = gallerySurface?.getBoundingClientRect();
-      const quoteBounds = quote?.getBoundingClientRect();
+      const ctaBounds = cta?.getBoundingClientRect();
       const galleryColour = galleryBounds && galleryBounds.top <= navY && galleryBounds.bottom >= navY
         ? foregroundFor(getComputedStyle(gallerySurface!).backgroundColor)
         : null;
-      const quoteColour = quote?.querySelector<HTMLElement>("[data-quote-colour]");
+      const ctaColour = cta?.querySelector<HTMLElement>("[data-cta-colour]");
+      const isOnCta = Boolean(
+        ctaBounds && ctaBounds.top <= navY && ctaBounds.bottom >= navY,
+      );
       const isOnPrimary = Boolean(
-        quoteBounds && quoteBounds.top <= navY && quoteBounds.bottom >= navY
-        && quoteColour && Number(getComputedStyle(quoteColour).opacity) > 0.5
-        && isPrimary(getComputedStyle(quoteColour).backgroundColor),
+        ctaBounds && ctaBounds.top <= navY && ctaBounds.bottom >= navY
+        && ctaColour && Number(getComputedStyle(ctaColour).opacity) > 0.5
+        && isPrimary(getComputedStyle(ctaColour).backgroundColor),
       ) || Boolean(heroFill && Number(getComputedStyle(heroFill).opacity) > 0.5 && (() => {
         const bounds = heroFill.getBoundingClientRect();
         return bounds.top <= navY && bounds.bottom >= navY && bounds.left <= innerWidth / 2 && bounds.right >= innerWidth / 2;
       })());
-      header.dataset.surface = isOnPrimary ? "primary" : "default";
+      header.dataset.surface = isOnCta ? "cta" : isOnPrimary ? "primary" : "default";
       header.querySelectorAll<HTMLElement>("a, button").forEach(link => {
+        if (isOnCta) {
+          link.style.color = "#11120d";
+          return;
+        }
         if (galleryColour) {
           link.style.color = galleryColour;
           return;

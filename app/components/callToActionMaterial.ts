@@ -102,7 +102,7 @@ const FRAGMENT = /* glsl */ `
     float coverage = max(shade, max(rim, ring));
 
     vec3 shaded = coverage > 0.5 ? uInk : uPaper;
-    // Flatten only at the peak of the Quote zoom so the matching full-screen
+    // Flatten only at the peak of the CTA zoom so the matching full-screen
     // lime layer can take over without an edge.
     vec3 zoomColour = mix(shaded, uPaper, uFlat);
     // The CTA figure uses the site primary on its paper areas, with the sketch

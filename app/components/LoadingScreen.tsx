@@ -15,7 +15,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { toCreasedNormals } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { createPoser } from "./hero-dive/poser";
 import { sampleDive } from "./hero-dive/divePose";
-import { createStickmanMaterial, disposeModel } from "./quoteModelMaterial";
+import { createStickmanMaterial, disposeModel } from "./callToActionMaterial";
 import type { ScrollRuntime } from "./warp-grid/ScrollProvider";
 import styles from "./LoadingScreen.module.css";
 

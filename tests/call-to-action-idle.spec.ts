@@ -4,9 +4,9 @@ test('entry figure spins without input, including after returning from the zoom'
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('http://localhost:3000');
   await expect(page.locator('[aria-label="Loading portfolio"]')).toHaveCount(0, { timeout: 30000 });
-  const actor = page.locator('[data-quote-actor]');
+  const actor = page.locator('[data-cta-actor]');
   await expect(actor).toHaveAttribute('data-model-ready', 'true');
-  const entry = await page.locator('#quote').evaluate(el => el.getBoundingClientRect().top + scrollY - 180);
+  const entry = await page.locator('#call-to-action').evaluate(el => el.getBoundingClientRect().top + scrollY - 180);
 
   for (const returnFromZoom of [false, true]) {
     if (returnFromZoom) {

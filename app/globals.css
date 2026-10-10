@@ -69,6 +69,12 @@ body {
   color: var(--ink);
 }
 
+.navbar[data-surface="cta"] .nav-links a,
+.navbar[data-surface="cta"] .nav-wordmark,
+.navbar[data-surface="cta"] .nav-toggle {
+  color: var(--ink) !important;
+}
+
 .navbar nav,
 .nav-links {
   display: flex;
@@ -161,7 +167,7 @@ body {
 
 .nav-toggle { display: none; }
 @media (max-width: 700px) {
-  :root { --page-gutter: clamp(10px, 2.5vw, 14px); }
+  :root { --page-gutter: 1.25rem; }
   .navbar { padding-block: 0.5rem; }
   .navbar nav { flex-wrap: nowrap; gap: 1rem; }
   .nav-toggle {

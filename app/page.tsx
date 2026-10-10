@@ -4,7 +4,7 @@ import WorkShowcase from "./components/WorkShowcase";
 import CaseStudies from "./components/CaseStudies";
 import Creative from "./components/Creative";
 import About from "./components/About";
-import Quote from "./components/Quote";
+import CallToAction from "./components/CallToAction";
 
 export default function Home() {
   return (
@@ -15,7 +15,7 @@ export default function Home() {
         <WorkShowcase>
           <CaseStudies />
           <Creative />
-          <About><Quote /></About>
+          <About><CallToAction /></About>
         </WorkShowcase>
       </main>
     </>

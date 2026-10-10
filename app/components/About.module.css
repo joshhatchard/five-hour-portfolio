@@ -97,7 +97,7 @@
 
 .background span { color: var(--paper); }
 
-.quoteMount {
+.callToActionMount {
   position: relative;
   z-index: 2;
   width: 100vw;

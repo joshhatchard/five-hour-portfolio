@@ -140,21 +140,21 @@ test("About shares Creative's canvas and falls back cleanly", async ({ page }) =
   expect(errors).toEqual([]);
 });
 
-test("quote sequence contains the figure, quotes, and contact prompt", async ({ page }) => {
+test("call-to-action sequence contains the figure, quotes, and contact prompt", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto(baseURL);
-  const quote = page.locator("#quote");
-  await quote.scrollIntoViewIfNeeded();
-  await expect(quote).toHaveAttribute("data-animated", "true");
-  await expect(quote.locator("[data-quote-actor]")).toHaveCount(1);
-  await expect(quote.locator("[data-quote-words]")).toHaveCount(2);
-  await expect(quote.locator("[data-quote-cta]")).toHaveCount(1);
+  const cta = page.locator("#call-to-action");
+  await cta.scrollIntoViewIfNeeded();
+  await expect(cta).toHaveAttribute("data-animated", "true");
+  await expect(cta.locator("[data-cta-actor]")).toHaveCount(1);
+  await expect(cta.locator("[data-quote-words]")).toHaveCount(2);
+  await expect(cta.locator("[data-cta-content]")).toHaveCount(1);
 });
 
-test("quote section fits the mobile viewport", async ({ page }) => {
+test("call-to-action section fits the mobile viewport", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(baseURL);
-  const section = page.locator('#quote');
+  const section = page.locator('#call-to-action');
   await section.scrollIntoViewIfNeeded();
   await expect(section.locator("[data-quote-words]")).toHaveCount(2);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
