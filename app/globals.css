@@ -209,7 +209,7 @@ body {
     justify-content: center;
     align-items: stretch;
     gap: clamp(0.75rem, 2dvh, 1.5rem);
-    padding: calc(5rem + env(safe-area-inset-top)) var(--page-gutter) calc(2rem + env(safe-area-inset-bottom));
+    padding: calc(5rem + env(safe-area-inset-top)) var(--page-gutter) calc(4.5rem + env(safe-area-inset-bottom));
     background: var(--primary);
     border: 0;
     visibility: hidden;

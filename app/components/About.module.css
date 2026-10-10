@@ -1,6 +1,6 @@
 .section {
   position: relative;
-  padding-top: clamp(6rem, 12vw, 12rem);
+  padding-top: clamp(8rem, 13vw, 13rem);
   padding-bottom: 0;
   padding-inline: var(--page-gutter);
   background: transparent;
@@ -9,42 +9,15 @@
   position: relative;
   z-index: 2;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-  border: 1px solid color-mix(in srgb, var(--paper) 28%, transparent);
-  background-color: var(--ink);
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: clamp(1.5rem, 4vw, 5rem);
   color: var(--paper);
-  /* Continue Creative's three-column guides behind the two-column content. */
-  background-image: linear-gradient(to right, transparent calc(66.666% - 0.5px), color-mix(in srgb, var(--paper) 22%, transparent) calc(66.666% - 0.5px), color-mix(in srgb, var(--paper) 22%, transparent) calc(66.666% + 0.5px), transparent calc(66.666% + 0.5px));
 }
-
-.grid::before,
-.grid::after {
-  content: "+";
-  position: absolute;
-  left: calc(33.333% - 5px);
-  color: var(--primary);
-  font-family: var(--font-label);
-  font-size: 0.75rem;
-  font-weight: 400;
-}
-
-.grid::before { top: -9px; }
-.grid::after { bottom: -9px; }
 
 .portraitColumn {
   min-width: 0;
-  padding: clamp(2rem, 6vw, 6rem) clamp(1.5rem, 2.8vw, 2.5rem);
-  border-right: 1px solid color-mix(in srgb, var(--paper) 28%, transparent);
-}
-
-.label {
-  margin: 0 0 3rem;
-  font-family: var(--font-label);
-  font-size: 0.75rem;
-  font-weight: 400;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--primary);
+  grid-column: 1 / 5;
+  padding-top: clamp(0rem, 1vw, 1rem);
 }
 
 .portrait {
@@ -61,61 +34,54 @@
 }
 
 .name {
-  /* Keep the signature above the shared canvas as the portrait bends. */
   position: relative;
   z-index: 11;
   width: fit-content;
-  margin-top: -1.25rem;
-  margin-left: 0.75rem;
-  padding: 0.25rem 0.65rem;
-  background: var(--primary);
-  color: var(--ink);
+  margin-top: 0.9rem;
+  color: var(--primary);
   font-family: var(--font-body);
-  font-size: clamp(1.0625rem, 1.5vw, 1.3125rem);
+  font-size: clamp(1rem, 1.3vw, 1.25rem);
   font-weight: 500;
 }
 
 .bio {
   min-width: 0;
-  padding: clamp(2rem, 6vw, 6rem) clamp(1.5rem, 3vw, 3rem);
-  align-self: center;
+  grid-column: 5 / -1;
+  padding-top: clamp(0rem, 1vw, 1rem);
 }
 
 .intro,
 .background {
   margin: 0;
-  max-width: 50ch;
-  font-size: clamp(1.0625rem, 1.5vw, 1.3125rem);
+  max-width: 25ch;
+  font-family: var(--font-body);
+  font-size: clamp(2.1rem, 3.9vw, 4.75rem);
   font-weight: 400;
-  line-height: 1.4;
+  line-height: 1.02;
+  letter-spacing: -0.045em;
 }
+
+.accent { color: var(--primary); }
 
 .background {
-  margin-top: 2rem;
-  color: color-mix(in srgb, var(--paper) 65%, transparent);
+  margin-top: clamp(2.25rem, 4vw, 4.5rem);
+  color: var(--paper);
 }
-
-.background span { color: var(--paper); }
 
 .callToActionMount {
   position: relative;
   z-index: 2;
   width: calc(100% + var(--page-gutter) + var(--page-gutter));
-  margin-top: 0;
+  margin-top: clamp(7rem, 13vw, 14rem);
   margin-left: calc(-1 * var(--page-gutter));
 }
 
 @media (max-width: 700px) {
   .grid {
-    grid-template-columns: 1fr;
-    background-image: none;
+    display: block;
   }
-  .grid::before,
-  .grid::after { left: -5px; }
-  .portraitColumn {
-    border-right: 0;
-    border-bottom: 1px solid color-mix(in srgb, var(--paper) 28%, transparent);
-  }
-  .portrait { max-width: none; }
-  .label { margin-bottom: 2rem; }
+  .portraitColumn { width: 100%; max-width: none; }
+  .bio { margin-top: 3.5rem; }
+  .intro,
+  .background { max-width: 18ch; font-size: clamp(1.9rem, 8.5vw, 3.4rem); }
 }

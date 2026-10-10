@@ -1,5 +1,6 @@
 import Splash from "./hero-dive/Splash";
 import WarpImage from "./warp-grid/WarpImage";
+import WarpTag from "./warp-grid/WarpTag";
 import styles from "./CaseStudies.module.css";
 
 // Replace the artwork and titles with finished case studies when ready.
@@ -20,8 +21,8 @@ export default function CaseStudies() {
             <figure className={styles.figure}>
               <div className={styles.artwork}>
                 <WarpImage src={project.src} alt={project.alt} width={1600} height={1000} className={styles.image} />
-                <span className={styles.tag}>{project.type}</span>
               </div>
+              <WarpTag className={styles.tag}>{project.type}</WarpTag>
               <figcaption className={styles.caption}>
                 <h3 id={`project-${project.number}`}>{project.title}</h3>
                 <span className={styles.year}>{project.year}</span>

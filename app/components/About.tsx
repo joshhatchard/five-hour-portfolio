@@ -7,7 +7,6 @@ export default function About({ children }: { children?: ReactNode }) {
     <section id="about" className={styles.section} aria-label="About me">
       <div className={styles.grid} data-about-wipe>
         <div className={styles.portraitColumn}>
-          <p className={styles.label}>About</p>
           <figure className={styles.portrait}>
             <WarpImage
               src="/about/portrait-placeholder.svg"
@@ -16,17 +15,15 @@ export default function About({ children }: { children?: ReactNode }) {
               height={800}
               className={styles.image}
             />
-            <figcaption className={styles.name}>Your name</figcaption>
+            <figcaption className={styles.name}>Hi, I’m Josh :)</figcaption>
           </figure>
         </div>
         <div className={styles.bio}>
-          {/* Replace these two paragraphs with your introduction and background. */}
           <p className={styles.intro}>
-            A little about me, what I do, and what I care about.
+            I’m a designer and developer exploring <span className={styles.accent}>bold ideas</span> at the edge of what <span className={styles.accent}>AI</span> makes possible.
           </p>
           <p className={styles.background}>
-            A few words about my <span>background</span>, my current focus,
-            and the <span>people I’ve worked with</span>.
+            Driven by curiosity and a love of the unfamiliar, I believe the best work comes from <span className={styles.accent}>stretching what’s known</span>.
           </p>
         </div>
       </div>

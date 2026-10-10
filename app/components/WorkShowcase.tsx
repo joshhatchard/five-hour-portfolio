@@ -8,6 +8,9 @@ const clampRange = (value: number, minimum: number, maximum: number) => Math.min
 const mix = (from: number, to: number, amount: number) => Math.round(from + (to - from) * amount);
 const colour = (from: readonly number[], to: readonly number[], amount: number) =>
   `rgb(${mix(from[0], to[0], amount)}, ${mix(from[1], to[1], amount)}, ${mix(from[2], to[2], amount)})`;
+// A short fade centred exactly on the viewport centre line.
+const sectionFade = (top: number, viewport: number) =>
+  clamp((viewport * 0.58 - top) / (viewport * 0.16));
 
 export default function WorkShowcase({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -30,8 +33,8 @@ export default function WorkShowcase({ children }: { children: ReactNode }) {
       const height = Math.round(surface.clientHeight);
       const density = Math.min(window.devicePixelRatio || 1, 2);
       const viewport = window.innerHeight;
-      const creativeProgress = clamp((viewport * 0.65 - creative.getBoundingClientRect().top) / (viewport * 0.7));
-      const aboutProgress = clamp((viewport * 0.65 - about.getBoundingClientRect().top) / (viewport * 0.7));
+      const creativeProgress = sectionFade(creative.getBoundingClientRect().top, viewport);
+      const aboutProgress = sectionFade(about.getBoundingClientRect().top, viewport);
       const background = aboutProgress > 0
         ? colour([255, 255, 255], [17, 18, 13], aboutProgress)
         : colour([17, 18, 13], [255, 255, 255], creativeProgress);

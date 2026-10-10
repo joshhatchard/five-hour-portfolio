@@ -116,7 +116,7 @@ export default function CallToAction() {
     gsap.set(spinCaption, { autoAlpha: 0, y: 8 });
     gsap.set(footer, { autoAlpha: reducedMotion ? 1 : 0, y: reducedMotion ? 0 : 36 });
     gsap.set(contactLetters, { visibility: reducedMotion ? "visible" : "hidden" });
-    const entryIdle = 0.65;
+    const entryIdle = 0;
     // Extra scroll distance after the last word settles, for reading each quote.
     const readingHold = 0.65;
     const secondQuote = entryIdle + 3.4 + readingHold;
@@ -128,7 +128,7 @@ export default function CallToAction() {
         trigger: section,
         start: "top top",
         end: "bottom bottom",
-        scrub: 0.4,
+        scrub: true,
         invalidateOnRefresh: true,
       },
     });

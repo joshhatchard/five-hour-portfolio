@@ -7,6 +7,5 @@
 }
 .gallery {
   position: relative;
-  z-index: 2;
-  padding: clamp(6rem, 12vw, 12rem) 0 30svh;
+  padding: clamp(8rem, 16vw, 15rem) 0 30svh;
 }

@@ -8,7 +8,6 @@ const creativeWork: CreativeWork[] = [
   { title: "Poster series", tag: "Print", src: "/creative/poster-series.svg", alt: "Pink poster placeholder numbered 01" },
   { title: "Small symbols", tag: "Icons", src: "/creative/small-symbols.svg", alt: "Neutral icon placeholder with a star symbol" },
   { title: "Colour study", tag: "Exploration", src: "/creative/colour-study.svg", alt: "Yellow colour study placeholder with a circle" },
-  { title: "Motion test", tag: "Motion", src: "/creative/motion-test.svg", alt: "Sage motion placeholder with a directional arrow" },
 ];
 
 export default function Creative() {

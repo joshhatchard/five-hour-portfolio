@@ -33,6 +33,7 @@ export default function WarpPlane({ entry }: { entry: WarpEntry }) {
     const mesh = new Mesh(geometry, material);
     mesh.visible = false;
     mesh.frustumCulled = false;
+    mesh.renderOrder = entry.layer ?? 0;
     scene.add(mesh);
     const measurePosition = () => {
       const bounds = image.getBoundingClientRect();
